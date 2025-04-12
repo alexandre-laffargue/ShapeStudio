@@ -44,7 +44,7 @@ public class Rectangle implements Shape {
     }
 
 
-        @Override
+    @Override
     public int getX() {
         return x;
     }
@@ -52,6 +52,16 @@ public class Rectangle implements Shape {
     @Override
     public int getY() {
         return y;
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return length;
     }
 
     @Override

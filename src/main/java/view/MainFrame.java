@@ -36,10 +36,10 @@ public class MainFrame extends Frame {
             commandManager::redo
         );
         toolbarPanel = new ToolbarPanel();
-        drawingPanel = new DrawingPanel(model, commandManager);
-
-        // Configurer le gestionnaire de glisser-déposer
-        DragDropManager dragDropManager = new DragDropManager(toolbarPanel, drawingPanel);
+        drawingPanel = new DrawingPanel(model, commandManager, toolbarPanel);
+        
+  
+        menubarPanel.setDrawingPanel(drawingPanel);
 
         add(menubarPanel, BorderLayout.NORTH);
         add(toolbarPanel, BorderLayout.WEST);
@@ -82,8 +82,7 @@ public class MainFrame extends Frame {
         }
     }
 
-    
 
 
-    // Ajoutez le bouton quelque part dans votre interface
+
 }

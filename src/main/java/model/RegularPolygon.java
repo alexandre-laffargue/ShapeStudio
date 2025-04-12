@@ -75,6 +75,19 @@ public class RegularPolygon implements Shape {
     }
 
     @Override
+    public int getWidth() {
+        // Calculate the width based on the radius and number of sides
+        double radius = sideLength / (2 * Math.sin(Math.PI / sides));
+        return (int)(radius * 2);
+    }
+
+    @Override
+    public int getHeight() {
+        // For a regular polygon, height is typically the same as width
+        return getWidth();
+    }
+
+    @Override
     public Shape copy() {
         RegularPolygon copy = new RegularPolygon(x, y, sides, sideLength);
         copy.rotation = this.rotation;

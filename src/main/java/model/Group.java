@@ -58,6 +58,42 @@ public class Group implements Shape {
     }
 
     @Override
+    public int getWidth() {
+        if (children.isEmpty()) return 0;
+        
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        
+        for (Shape child : children) {
+            int childX = child.getX();
+            int childWidth = child.getWidth();
+            
+            minX = Math.min(minX, childX);
+            maxX = Math.max(maxX, childX + childWidth);
+        }
+        
+        return maxX - minX;
+    }
+
+    @Override
+    public int getHeight() {
+        if (children.isEmpty()) return 0;
+        
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        
+        for (Shape child : children) {
+            int childY = child.getY();
+            int childHeight = child.getHeight();
+            
+            minY = Math.min(minY, childY);
+            maxY = Math.max(maxY, childY + childHeight);
+        }
+        
+        return maxY - minY;
+    }
+
+    @Override
     public Shape copy() {
         Group copiedGroup = new Group();
         for (Shape shape : children) {
