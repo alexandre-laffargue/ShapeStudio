@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 import visitor.ShapeVisitor;
@@ -8,9 +9,10 @@ public interface Shape {
     Shape copy();
     void draw(Graphics g);
     void move(int dx, int dy);
-    void colorize(Graphics g, int color);
+    void setColor(Color color);
     int getX();
     int getY();
+    Color getColor();
 
     int getWidth();
     int getHeight();

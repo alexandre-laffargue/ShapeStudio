@@ -54,8 +54,8 @@ public class RegularPolygon implements Shape {
     }
 
     @Override
-    public void colorize(Graphics g, int color) {
-        this.color = new Color(color);
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     @Override
@@ -72,6 +72,11 @@ public class RegularPolygon implements Shape {
     @Override
     public int getY() {
         return y;
+    }
+
+    @Override
+    public Color getColor() {
+        return color;
     }
 
     @Override

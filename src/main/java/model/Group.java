@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,9 @@ public class Group implements Shape {
     }
 
     @Override
-    public void colorize(Graphics g, int color) {
+    public void setColor(Color color) {
         for (Shape shape : children) {
-            shape.colorize(g, color);
+            shape.setColor(color);
         }
     }
 
@@ -55,6 +56,11 @@ public class Group implements Shape {
     @Override
     public int getY() {
         return children.isEmpty() ? 0 : children.get(0).getY();
+    }
+
+    @Override
+    public Color getColor() {
+        return children.isEmpty() ? Color.BLACK : children.get(0).getColor();
     }
 
     @Override

@@ -10,6 +10,7 @@ public class Rectangle implements Shape {
     private int length;
     private int width;
     private int x, y;
+    private Color color;
 
     private final int DEFAULT_LENGTH = 50;
     private final int DEFAULT_WIDTH = 100;
@@ -21,20 +22,20 @@ public class Rectangle implements Shape {
         this.y = y;
         this.length = DEFAULT_LENGTH;
         this.width = DEFAULT_WIDTH;
+        this.color = DEFAULT_COLOR;
     }
 
     @Override
     public void draw(Graphics g) {
-        g.setColor(DEFAULT_COLOR);
+        g.setColor(color);
         g.drawRect(x, y, width, length);
         g.fillRect(x, y, width, length);
     }
 
 
     @Override
-    public void colorize(Graphics g, int color) {
-        g.setColor(new Color(color));
-        g.fillRect(x, y, width, length);
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     @Override
@@ -52,6 +53,11 @@ public class Rectangle implements Shape {
     @Override
     public int getY() {
         return y;
+    }
+
+    @Override
+    public Color getColor() {
+        return color;
     }
 
     @Override
