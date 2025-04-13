@@ -18,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import command.AddShapeCommand;
+import command.ColorChangeCommand;
 import command.CommandManager;
 import command.MoveShapeCommand;
 import command.RemoveShapeCommand;
@@ -171,12 +172,14 @@ public class DrawingPanel extends Panel {
         contextMenu = new JPopupMenu();
         JMenuItem changeColorItem = new JMenuItem("Changer la couleur");
 
-        // Action pour ouvrir le color picker
+        // Action : Change Color
         changeColorItem.addActionListener(e -> {
             if (selectedShape != null) {
                 Color newColor = JColorChooser.showDialog(this, "Choisir une couleur", Color.BLACK);
                 if (newColor != null) {
-                    selectedShape.setColor(newColor); // Assurez-vous que Shape a une méthode setColor
+                    commandManager.executeCommand(
+                                    new ColorChangeCommand(model, selectedShape, newColor)
+                                );
                     repaint();
                 }
             }

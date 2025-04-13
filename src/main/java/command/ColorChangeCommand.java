@@ -18,14 +18,12 @@ public class ColorChangeCommand extends AbstractCommand {
 
     @Override
     public void execute() {
-        // Sauvegarder la couleur précédente avant de changer
         previousColor = shape.getColor();
         shape.setColor(newColor);
     }
 
     @Override
     public void undo() {
-        // Restaurer la couleur précédente
         shape.setColor(previousColor);
     }
 }
