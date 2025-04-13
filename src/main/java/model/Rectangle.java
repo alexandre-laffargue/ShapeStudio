@@ -7,12 +7,12 @@ import visitor.ShapeVisitor;
 
 public class Rectangle implements Shape {
 
-    private int length;
+    private int height;
     private int width;
     private int x, y;
     private Color color;
 
-    private final int DEFAULT_LENGTH = 50;
+    private final int DEFAULT_HEIGHT = 50;
     private final int DEFAULT_WIDTH = 100;
     private final Color DEFAULT_COLOR = Color.BLUE;
     
@@ -20,16 +20,19 @@ public class Rectangle implements Shape {
     public Rectangle(int x, int y) {
         this.x = x;
         this.y = y;
-        this.length = DEFAULT_LENGTH;
+        this.height = DEFAULT_HEIGHT;
         this.width = DEFAULT_WIDTH;
         this.color = DEFAULT_COLOR;
     }
 
     @Override
     public void draw(Graphics g) {
+        int topLeftX = getX() - getWidth() / 2;
+        int topLeftY = getY() - getHeight() / 2;
+
+        // Dessiner le rectangle
         g.setColor(color);
-        g.drawRect(x, y, width, length);
-        g.fillRect(x, y, width, length);
+        g.fillRect(topLeftX, topLeftY, getWidth(), getHeight());
     }
 
 
@@ -67,12 +70,16 @@ public class Rectangle implements Shape {
 
     @Override
     public int getHeight() {
-        return length;
+        return height;
     }
 
     @Override
     public Shape copy() {
-        return new Rectangle(x, y);
+        Rectangle copy = new Rectangle(x, y);
+        copy.width = this.width;
+        copy.height = this.height;
+        copy.color = this.color;
+        return copy;
     }
     
     @Override
@@ -82,7 +89,7 @@ public class Rectangle implements Shape {
             this.x = rect.x;
             this.y = rect.y;
             this.width = rect.width;
-            this.length = rect.length;
+            this.height = rect.height;
         }
     }
 

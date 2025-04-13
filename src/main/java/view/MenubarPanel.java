@@ -35,7 +35,7 @@ public class MenubarPanel extends Panel {
         this.redoAction = redoAction;
 
         setBackground(Color.LIGHT_GRAY);
-        setPreferredSize(new Dimension(400, 50)); // Largeur ajustée pour les menus horizontaux
+        setPreferredSize(new Dimension(400, 60)); // Largeur ajustée pour les menus horizontaux
 
         addDefaultItems();
         setupEventHandlers();
@@ -119,10 +119,6 @@ public class MenubarPanel extends Panel {
     // Updated method to handle SVG and other image files
     private Image loadIcon(String path) {
         try {
-            if (path.toLowerCase().endsWith(".svg")) {
-                return loadSVGIcon(path);
-            }
-            
             // Try multiple ways to load the resource
             InputStream inputStream = getClass().getResourceAsStream(path);
             
@@ -152,73 +148,6 @@ public class MenubarPanel extends Panel {
         }
     }
     
-    // Add method to load SVG files
-    private Image loadSVGIcon(String path) {
-        try {
-            // For SVG files, we need to use the SVG library
-            // Since we don't have direct SVG rendering in standard Java,
-            // we'll create a placeholder for now and you can add the SVG library later
-            System.out.println("Attempting to load SVG: " + path);
-            
-            // Try to get the resource as a stream
-            InputStream inputStream = getClass().getResourceAsStream(path);
-            if (inputStream == null) {
-                inputStream = getClass().getClassLoader().getResourceAsStream(path.startsWith("/") ? path.substring(1) : path);
-            }
-            
-            if (inputStream != null) {
-                System.out.println("SVG resource found! You need to add an SVG library to render it.");
-                
-                // Try to use Apache Batik if available
-                try {
-                    // Reflection to avoid direct dependency
-                    Class<?> transcodeClass = Class.forName("org.apache.batik.transcoder.image.PNGTranscoder");
-                    Object transcoder = transcodeClass.getDeclaredConstructor().newInstance();
-                    
-                    Class<?> transcoderInputClass = Class.forName("org.apache.batik.transcoder.TranscoderInput");
-                    Object input = transcoderInputClass.getDeclaredConstructor(InputStream.class).newInstance(inputStream);
-                    
-                    // Create a ByteArrayOutputStream to store the image data
-                    java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
-                    Class<?> transcoderOutputClass = Class.forName("org.apache.batik.transcoder.TranscoderOutput");
-                    Object output = transcoderOutputClass.getDeclaredConstructor(java.io.OutputStream.class).newInstance(outputStream);
-                    
-                    // Transcode the SVG to PNG
-                    transcodeClass.getMethod("transcode", transcoderInputClass, transcoderOutputClass)
-                                   .invoke(transcoder, input, output);
-                    
-                    // Convert to BufferedImage
-                    byte[] imageData = outputStream.toByteArray();
-                    java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(imageData);
-                    return ImageIO.read(bais);
-                } catch (Exception e) {
-                    System.out.println("SVG rendering with Batik failed: " + e.getMessage());
-                    // Continue to fallback
-                }
-                
-                // Create a simple colored icon with the first letter as a fallback
-                BufferedImage svgPlaceholder = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
-                Graphics g = svgPlaceholder.getGraphics();
-                g.setColor(Color.BLUE); // Use blue to distinguish from regular fallback icons
-                g.fillRect(0, 0, 32, 32);
-                g.setColor(Color.WHITE);
-                
-                // Extract name from path for label
-                String name = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-                g.drawString(name.substring(0, 1).toUpperCase(), 12, 20);
-                g.dispose();
-                
-                return svgPlaceholder;
-            } else {
-                System.out.println("SVG resource not found: " + path);
-                return createFallbackIcon(path);
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading SVG icon " + path + ": " + e.getMessage());
-            e.printStackTrace();
-            return createFallbackIcon(path);
-        }
-    }
     
     private Image loadAndResizeIcon(String path, int targetSize) {
         Image originalIcon = loadIcon(path);

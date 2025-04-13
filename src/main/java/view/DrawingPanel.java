@@ -35,8 +35,7 @@ public class DrawingPanel extends Panel {
     private boolean isAreaSelecting;
     private Rectangle selectionRect;
     private JPopupMenu contextMenu;
-    private JColorChooser colorChooser;
-    
+
     public DrawingPanel(SceneModel model, CommandManager commandManager, ToolbarPanel toolbarPanel) {
         this.model = model;
         this.commandManager = commandManager;
@@ -44,12 +43,12 @@ public class DrawingPanel extends Panel {
         this.selectedShapes = new ArrayList<>();
         this.isDragging = false;
         this.isAreaSelecting = false;
-        
+
         setBackground(Color.WHITE);
         setupEventHandlers();
         setupContextMenu();
     }
-    
+
     private void setupEventHandlers() {
         addMouseListener(new MouseAdapter() {
             @Override
@@ -75,7 +74,7 @@ public class DrawingPanel extends Panel {
                         } else {
                             // Si aucun item n'est sélectionné dans la ToolbarPanel, sélectionner une forme
                             Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
-                            
+
                             if (shapeUnderClick != null) {
                                 if (e.isControlDown()) {
                                     // Ajouter à la sélection si Ctrl est maintenu
@@ -148,26 +147,26 @@ public class DrawingPanel extends Panel {
                     // Mettre à jour le rectangle de sélection
                     updateSelectionRect(e.getPoint());
                     repaint();
-                } 
+                }
                 else if (!selectedShapes.isEmpty()) {
                     isDragging = true;
-                    
+
                     // Calculer le déplacement
                     int dx = e.getX() - dragStart.x;
                     int dy = e.getY() - dragStart.y;
-                    
+
                     // Déplacer toutes les formes sélectionnées
                     for (Shape shape : selectedShapes) {
                         shape.move(dx, dy);
                     }
-                    
+
                     dragStart = e.getPoint(); // Mettre à jour le point de départ
                     repaint();
                 }
             }
         });
     }
-    
+
     private void setupContextMenu() {
         contextMenu = new JPopupMenu();
         JMenuItem changeColorItem = new JMenuItem("Changer la couleur");
@@ -185,7 +184,7 @@ public class DrawingPanel extends Panel {
 
         contextMenu.add(changeColorItem);
     }
-    
+
     private void updateSelectionRect(Point currentPoint) {
         int x = Math.min(dragStart.x, currentPoint.x);
         int y = Math.min(dragStart.y, currentPoint.y);
@@ -193,7 +192,7 @@ public class DrawingPanel extends Panel {
         int height = Math.abs(currentPoint.y - dragStart.y);
         selectionRect = new Rectangle(x, y, width, height);
     }
-    
+
     private void finishAreaSelection() {
         if (selectionRect != null) {
             // Sélectionner toutes les formes qui intersectent avec le rectangle de sélection
@@ -201,74 +200,54 @@ public class DrawingPanel extends Panel {
             for (Shape shape : shapes) {
                 // Créer un rectangle pour représenter la hitbox de la forme
                 Rectangle shapeBounds;
-                
-                // Vérifier si la forme est un Rectangle (qui utilise le coin supérieur gauche)
-                if (shape instanceof model.Rectangle) {
-                    // Pour les rectangles, utiliser les coordonnées directes car elles représentent le coin supérieur gauche
-                    shapeBounds = new Rectangle(
-                        shape.getX(), 
-                        shape.getY(),
-                        shape.getWidth(),
-                        shape.getHeight()
-                    );
-                } else {
-                    // Pour les autres formes, utiliser le centre comme référence
-                    shapeBounds = new Rectangle(
-                        shape.getX() - shape.getWidth()/2,
-                        shape.getY() - shape.getHeight()/2,
-                        shape.getWidth(),
-                        shape.getHeight()
-                    );
-                }
-                
+
+                shapeBounds = new Rectangle(
+                    shape.getX() - shape.getWidth()/2,
+                    shape.getY() - shape.getHeight()/2,
+                    shape.getWidth(),
+                    shape.getHeight()
+                );
+
                 // Si le rectangle de sélection intersecte avec la hitbox de la forme
                 if (selectionRect.intersects(shapeBounds)) {
                     selectedShapes.add(shape);
                     System.out.println("Forme sélectionnée par la zone : " + shape);
                 }
             }
-            
+
             // Si une seule forme est sélectionnée, la définir comme forme sélectionnée principale
             if (selectedShapes.size() == 1) {
                 selectedShape = selectedShapes.get(0);
             }
         }
     }
-    
+
     private Shape findShapeAt(int x, int y) {
         List<Shape> shapes = model.getShapes();
         for (int i = shapes.size() - 1; i >= 0; i--) {
             Shape shape = shapes.get(i);
-            
-            // Vérifier si la forme est un Rectangle (qui utilise le coin supérieur gauche)
-            if (shape instanceof model.Rectangle) {
-                // Pour les rectangles, vérifier si le point est dans les limites absolues
-                if (x >= shape.getX() && x <= shape.getX() + shape.getWidth() &&
-                    y >= shape.getY() && y <= shape.getY() + shape.getHeight()) {
-                    return shape;
-                }
-            } else {
-                // Pour les autres formes, vérifier par rapport au centre
-                int halfWidth = shape.getWidth() / 2;
-                int halfHeight = shape.getHeight() / 2;
-                
-                if (x >= shape.getX() - halfWidth && x <= shape.getX() + halfWidth &&
-                    y >= shape.getY() - halfHeight && y <= shape.getY() + halfHeight) {
-                    return shape;
-                }
+
+            // Pour les autres formes, vérifier par rapport au centre
+            int halfWidth = shape.getWidth() / 2;
+            int halfHeight = shape.getHeight() / 2;
+
+            if (x >= shape.getX() - halfWidth && x <= shape.getX() + halfWidth &&
+                y >= shape.getY() - halfHeight && y <= shape.getY() + halfHeight) {
+                return shape;
             }
+
         }
         return null;
     }
-    
+
     public void addShape(Shape shape, int x, int y) {
         Shape newShape = shape.copy();
         newShape.move(x - newShape.getX(), y - newShape.getY());
-        
+
         commandManager.executeCommand(
             new AddShapeCommand(model, newShape)
         );
-        
+
         repaint();
     }
 
@@ -280,80 +259,57 @@ public class DrawingPanel extends Panel {
         commandManager.executeCommand(
             new RemoveShapeCommand(model, shape)
         );
-        
+
         repaint();
     }
-    
+
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        
+
         for (Shape shape : model.getShapes()) {
             shape.draw(g);
         }
-        
+
         // Dessiner les indicateurs de sélection pour les formes sélectionnées
         if (!selectedShapes.isEmpty()) {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.setColor(Color.BLUE);
-            g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, 
+            g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT,
                 BasicStroke.JOIN_BEVEL, 0, new float[]{3}, 0));
-            
+
             for (Shape shape : selectedShapes) {
-                Rectangle shapeBounds;
                 int[] corners = new int[8]; // Pour stocker les coordonnées des coins
-                
-                // Vérifier si la forme est un Rectangle
-                if (shape instanceof model.Rectangle) {
-                    // Pour les rectangles, dessiner à partir du coin supérieur gauche
-                    g2d.drawRect(
-                        shape.getX(),
-                        shape.getY(),
-                        shape.getWidth(),
-                        shape.getHeight()
-                    );
-                    
-                    // Points de contrôle aux coins
-                    corners[0] = shape.getX();
-                    corners[1] = shape.getY();
-                    corners[2] = shape.getX() + shape.getWidth();
-                    corners[3] = shape.getY();
-                    corners[4] = shape.getX();
-                    corners[5] = shape.getY() + shape.getHeight();
-                    corners[6] = shape.getX() + shape.getWidth();
-                    corners[7] = shape.getY() + shape.getHeight();
-                } else {
-                    // Pour les autres formes, dessiner par rapport au centre
-                    int halfWidth = shape.getWidth() / 2;
-                    int halfHeight = shape.getHeight() / 2;
-                    
-                    g2d.drawRect(
-                        shape.getX() - halfWidth, 
-                        shape.getY() - halfHeight, 
-                        shape.getWidth(),
-                        shape.getHeight()
-                    );
-                    
-                    // Points de contrôle aux coins
-                    corners[0] = shape.getX() - halfWidth;
-                    corners[1] = shape.getY() - halfHeight;
-                    corners[2] = shape.getX() + halfWidth;
-                    corners[3] = shape.getY() - halfHeight;
-                    corners[4] = shape.getX() - halfWidth;
-                    corners[5] = shape.getY() + halfHeight;
-                    corners[6] = shape.getX() + halfWidth;
-                    corners[7] = shape.getY() + halfHeight;
-                }
-                
-                // Dessiner les points de contrôle (commun à tous les types)
+
+                int halfWidth = shape.getWidth() / 2;
+                int halfHeight = shape.getHeight() / 2;
+
+                g2d.drawRect(
+                    shape.getX() - halfWidth,
+                    shape.getY() - halfHeight,
+                    shape.getWidth(),
+                    shape.getHeight()
+                );
+
+                // Points de contrôle aux coins
+                corners[0] = shape.getX() - halfWidth;
+                corners[1] = shape.getY() - halfHeight;
+                corners[2] = shape.getX() + halfWidth;
+                corners[3] = shape.getY() - halfHeight;
+                corners[4] = shape.getX() - halfWidth;
+                corners[5] = shape.getY() + halfHeight;
+                corners[6] = shape.getX() + halfWidth;
+                corners[7] = shape.getY() + halfHeight;
+
+                // Dessiner les points de contrôle
                 for (int i = 0; i < corners.length; i += 2) {
                     g2d.fillRect(corners[i] - 3, corners[i+1] - 3, 6, 6);
                 }
             }
-            
+
             g2d.dispose();
         }
-        
+
         // Dessiner le rectangle de sélection en cours
         if (isAreaSelecting && selectionRect != null) {
             Graphics2D g2d = (Graphics2D) g.create();
