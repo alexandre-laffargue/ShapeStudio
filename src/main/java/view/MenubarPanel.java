@@ -62,10 +62,10 @@ public class MenubarPanel extends Panel {
             }
         };
 
-        menuItems.add(new MenuItem("Save", loadAndResizeIcon("/icons/save.png", 32), saveAction));
-        menuItems.add(new MenuItem("Load", loadAndResizeIcon("/icons/load.png", 32), loadAction));
-        menuItems.add(new MenuItem("Undo", loadAndResizeIcon("/icons/undo.png", 32), wrappedUndoAction));
-        menuItems.add(new MenuItem("Redo", loadAndResizeIcon("/icons/redo.png", 32), wrappedRedoAction));
+        menuItems.add(new MenuItem(loadAndResizeIcon("/icons/save.png", 32), saveAction));
+        menuItems.add(new MenuItem(loadAndResizeIcon("/icons/load.png", 32), loadAction));
+        menuItems.add(new MenuItem(loadAndResizeIcon("/icons/undo.png", 32), wrappedUndoAction));
+        menuItems.add(new MenuItem(loadAndResizeIcon("/icons/redo.png", 32), wrappedRedoAction));
     }
     
 
@@ -178,12 +178,10 @@ public class MenubarPanel extends Panel {
 
     // Classe interne pour représenter un élément du menu
     private static class MenuItem {
-        private String name;
         private Image icon;
         private Runnable action;
 
-        public MenuItem(String name, Image icon, Runnable action) {
-            this.name = name;
+        public MenuItem(Image icon, Runnable action) {
             this.icon = icon;
             this.action = action;
         }

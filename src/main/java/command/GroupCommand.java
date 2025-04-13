@@ -1,35 +1,29 @@
 package command;
 
-import java.util.List;
+import java.util.Map;
+import java.awt.Point;
 
 import model.Group;
 import model.SceneModel;
 import model.Shape;
 
-public class GroupCommand extends AbstractCommand { // TODO : add coordinates of children
-    private final List<Shape> shapesToGroup;
+public class GroupCommand extends AbstractCommand {
+    private final Map<Shape, Point> shapesWithCoordinates;
     private Group group;
 
-    public GroupCommand(SceneModel scene, List<Shape> shapesToGroup) {
+    public GroupCommand(SceneModel scene, Map<Shape, Point> shapesWithCoordinates) {
         super(scene);
-        this.shapesToGroup = shapesToGroup;
+        this.shapesWithCoordinates = shapesWithCoordinates;
     }
 
     @Override
     public void execute() {
-        group = new Group();
-        for (Shape shape : shapesToGroup) {
-            group.add(shape);
-            scene.removeShape(shape);
-        }
+        group = new Group(shapesWithCoordinates);
         scene.addShape(group);
     }
 
     @Override
     public void undo() {
         scene.removeShape(group);
-        for (Shape shape : shapesToGroup) {
-            scene.addShape(shape);
-        }
     }
 }

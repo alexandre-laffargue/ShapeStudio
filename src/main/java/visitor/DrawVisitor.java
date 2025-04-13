@@ -4,7 +4,7 @@ import java.awt.Graphics;
 
 import model.Group;
 import model.Rectangle;
-import model.RegularPolygon;
+import model.Hexagon;
 
 public class DrawVisitor implements ShapeVisitor {
     private Graphics graphics;
@@ -26,7 +26,7 @@ public class DrawVisitor implements ShapeVisitor {
     }
     
     @Override
-    public void visit(RegularPolygon polygon) {
+    public void visit(Hexagon polygon) {
         polygon.draw(graphics);
     }
 }

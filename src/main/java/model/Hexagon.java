@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import visitor.ShapeVisitor;
 
-public class RegularPolygon implements Shape {
+public class Hexagon implements Shape {
     private int sides;
     private int sideLength;
     private int x, y; 
@@ -16,7 +16,7 @@ public class RegularPolygon implements Shape {
     private final int DEFAULT_SIDES = 6; 
     private final int DEFAULT_SIZE = 30;
     
-    public RegularPolygon(int x, int y) {
+    public Hexagon(int x, int y) {
         this.x = x;
         this.y = y;
         this.sides = DEFAULT_SIDES;
@@ -25,7 +25,7 @@ public class RegularPolygon implements Shape {
         this.color = DEFAULT_COLOR;
     }
     
-    public RegularPolygon(int x, int y, int sides, int sideLength) {
+    public Hexagon(int x, int y, int sides, int sideLength) {
         this.x = x;
         this.y = y;
         this.sides = sides;
@@ -37,20 +37,22 @@ public class RegularPolygon implements Shape {
     @Override
     public void draw(Graphics g) {
         g.setColor(color);
-        
+
         // Calculer les coordonnées des sommets
         int[] xPoints = new int[sides];
         int[] yPoints = new int[sides];
-        
+
+        // Rayon basé sur la longueur des côtés
         double radius = sideLength / (2 * Math.sin(Math.PI / sides));
-        
+
         for (int i = 0; i < sides; i++) {
             double angle = 2 * Math.PI * i / sides + Math.toRadians(rotation);
             xPoints[i] = (int) (x + radius * Math.cos(angle));
             yPoints[i] = (int) (y + radius * Math.sin(angle));
         }
-        
-        g.drawPolygon(xPoints, yPoints, sides);
+
+        // Dessiner et remplir l'hexagone
+        g.fillPolygon(xPoints, yPoints, sides);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class RegularPolygon implements Shape {
 
     @Override
     public Shape copy() {
-        RegularPolygon copy = new RegularPolygon(x, y, sides, sideLength);
+        Hexagon copy = new Hexagon(x, y, sides, sideLength);
         copy.rotation = this.rotation;
         copy.color = this.color;
         return copy;
@@ -102,8 +104,8 @@ public class RegularPolygon implements Shape {
 
     @Override
     public void updateFrom(Shape other) {
-        if (other instanceof RegularPolygon) {
-            RegularPolygon polygon = (RegularPolygon) other;
+        if (other instanceof Hexagon) {
+            Hexagon polygon = (Hexagon) other;
             this.x = polygon.x;
             this.y = polygon.y;
             this.sides = polygon.sides;
@@ -117,4 +119,9 @@ public class RegularPolygon implements Shape {
     public void accept(ShapeVisitor visitor) {
         visitor.visit(this);
     }
+
+    public int getSides() {
+        return sides;
+    }
+    
 }

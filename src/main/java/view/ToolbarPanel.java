@@ -6,14 +6,18 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Panel;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import model.Group;
+import model.Hexagon;
 import model.Rectangle;
-import model.RegularPolygon;
 import model.Shape;
 
 public class ToolbarPanel extends Panel {
@@ -38,10 +42,20 @@ public class ToolbarPanel extends Panel {
 
     private void addDefaultItems() {
         // Ajouter un rectangle
-        addTemplate(new Rectangle(0, 0), createRectangleIcon());
+        Shape rectangle = new Rectangle(50, 25);
+        addTemplate(rectangle, createShapeIcon(rectangle));
 
         // Ajouter un polygone régulier
-        addTemplate(new RegularPolygon(0, 0), createPolygonIcon());
+        Shape polygon = new Hexagon(0, 0);
+        addTemplate(polygon, createShapeIcon(polygon));
+
+        // Ajouter un groupe de formes
+        // Créer un groupe de formes avec des coordonnées relatives
+        Map<Shape, Point> shapesWithCoordinates = new HashMap<>();
+        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 150));
+        shapesWithCoordinates.put(new Hexagon(0, 0), new Point(30, 10));
+        Shape group = new Group(shapesWithCoordinates);
+        addTemplate(group, createShapeIcon(group));
 
         // Ajouter la corbeille
         trashItem = new ToolbarItem(null, createTrashIcon());
@@ -145,27 +159,32 @@ public class ToolbarPanel extends Panel {
         }
     }
 
-    private Image createRectangleIcon() {
+    private Image createShapeIcon(Shape shape) {
         BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = image.getGraphics();
-        g.setColor(Color.BLUE);
-        g.fillRect(4, 4, 24, 24);
-        g.setColor(Color.BLACK);
-        g.drawRect(4, 4, 24, 24);
-        g.dispose();
-        return image;
-    }
+        Graphics2D g2d = image.createGraphics();
 
-    private Image createPolygonIcon() {
-        BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = image.getGraphics();
-        g.setColor(Color.GREEN);
-        int[] xPoints = {16, 28, 24, 8, 4};
-        int[] yPoints = {4, 12, 24, 24, 12};
-        g.fillPolygon(xPoints, yPoints, 5);
-        g.setColor(Color.BLACK);
-        g.drawPolygon(xPoints, yPoints, 5);
-        g.dispose();
+        // Effacer l'arrière-plan
+        g2d.setColor(new Color(0, 0, 0, 0)); // Transparent
+        g2d.fillRect(0, 0, 32, 32);
+
+        // Définir la couleur de la forme
+        g2d.setColor(shape.getColor());
+
+        // Calculer le facteur d'échelle pour ajuster la forme à l'icône
+        double scaleX = 28.0 / shape.getWidth(); // Réduire légèrement pour éviter les coupures
+        double scaleY = 28.0 / shape.getHeight();
+        double scale = Math.min(scaleX, scaleY);
+
+        // Centrer la forme dans l'icône
+        int centerX = 16; // Centre de l'icône (32x32)
+        int centerY = 16;
+        g2d.translate(centerX, centerY);
+        g2d.scale(scale, scale);
+
+        // Dessiner la forme centrée
+        shape.draw(g2d);
+
+        g2d.dispose();
         return image;
     }
 

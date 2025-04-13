@@ -2,7 +2,7 @@ package visitor;
 
 import model.Group;
 import model.Rectangle;
-import model.RegularPolygon;
+import model.Hexagon;
 
 public class CountingVisitor implements ShapeVisitor {
     private int rectangleCount = 0;
@@ -25,7 +25,7 @@ public class CountingVisitor implements ShapeVisitor {
     }
     
     @Override
-    public void visit(RegularPolygon regularPolygon) {
+    public void visit(Hexagon regularPolygon) {
         totalCount++;
     }
     

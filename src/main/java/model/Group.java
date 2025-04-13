@@ -12,20 +12,36 @@ import visitor.ShapeVisitor;
 
 public class Group implements Shape {
     private final Map<Shape, Point> children; // Associer chaque forme à ses coordonnées relatives
+    private int width;
+    private int height;
 
-    public Group() {
+    public Group(Map<Shape, Point> shapesWithCoordinates) {
         this.children = new HashMap<>();
-    }
-
-    public void add(Shape shape) {
-        // Calculer les coordonnées relatives de la forme par rapport au groupe
-        int relativeX = shape.getX() - this.getX();
-        int relativeY = shape.getY() - this.getY();
-        children.put(shape, new Point(relativeX, relativeY));
-    }
-
-    public void remove(Shape shape) {
-        children.remove(shape);
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+    
+        for (Map.Entry<Shape, Point> entry : shapesWithCoordinates.entrySet()) {
+            Shape shape = entry.getKey();
+            Point relativePosition = entry.getValue();
+            this.children.put(shape, relativePosition);
+    
+            // Calculer les limites pour déterminer les dimensions du groupe
+            int shapeX = relativePosition.x;
+            int shapeY = relativePosition.y;
+            int shapeWidth = shape.getWidth();
+            int shapeHeight = shape.getHeight();
+    
+            minX = Math.min(minX, shapeX);
+            minY = Math.min(minY, shapeY);
+            maxX = Math.max(maxX, shapeX + shapeWidth);
+            maxY = Math.max(maxY, shapeY + shapeHeight);
+        }
+    
+        // Calculer les dimensions du groupe
+        this.width = maxX - minX;
+        this.height = maxY - minY;
     }
 
     public List<Shape> getChildren() {
@@ -89,47 +105,23 @@ public class Group implements Shape {
 
     @Override
     public int getWidth() {
-        if (children.isEmpty()) return 0;
-
-        int minX = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE;
-
-        for (Shape child : children.keySet()) {
-            int childX = child.getX();
-            int childWidth = child.getWidth();
-
-            minX = Math.min(minX, childX);
-            maxX = Math.max(maxX, childX + childWidth);
-        }
-
-        return maxX - minX;
+        return width;
     }
 
     @Override
     public int getHeight() {
-        if (children.isEmpty()) return 0;
-
-        int minY = Integer.MAX_VALUE;
-        int maxY = Integer.MIN_VALUE;
-
-        for (Shape child : children.keySet()) {
-            int childY = child.getY();
-            int childHeight = child.getHeight();
-
-            minY = Math.min(minY, childY);
-            maxY = Math.max(maxY, childY + childHeight);
-        }
-
-        return maxY - minY;
+        return height;
     }
 
     @Override
     public Shape copy() {
-        Group copiedGroup = new Group();
-        for (Shape shape : children.keySet()) {
-            copiedGroup.add(shape.copy());
+        Map<Shape, Point> copiedChildren = new HashMap<>();
+        for (Map.Entry<Shape, Point> entry : children.entrySet()) {
+            Shape shapeCopy = entry.getKey().copy();
+            Point relativePosition = entry.getValue();
+            copiedChildren.put(shapeCopy, new Point(relativePosition));
         }
-        return copiedGroup;
+        return new Group(copiedChildren);
     }
 
     @Override
@@ -138,7 +130,7 @@ public class Group implements Shape {
             Group otherGroup = (Group) other;
             this.children.clear();
             for (Shape child : otherGroup.getChildren()) {
-                this.add(child.copy());
+                //this.add(child.copy());
             }
         }
     }
