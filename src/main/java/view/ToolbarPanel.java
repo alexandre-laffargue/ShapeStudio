@@ -18,9 +18,11 @@ import java.util.Map;
 import model.Group;
 import model.Hexagon;
 import model.Rectangle;
+import model.SceneModel;
 import model.Shape;
 
 public class ToolbarPanel extends Panel {
+    private SceneModel model;
     private List<ToolbarItem> items;
     private ToolbarItem selectedItem; // Item actuellement sélectionné
     private ToolbarItem trashItem;
@@ -28,8 +30,9 @@ public class ToolbarPanel extends Panel {
     private static final int ITEM_HEIGHT = 60;
     private static final int ITEM_PADDING = 10;
 
-    public ToolbarPanel() {
+    public ToolbarPanel(SceneModel model) {
         this.items = new ArrayList<>();
+        this.model = model;
         setBackground(Color.LIGHT_GRAY);
         setPreferredSize(new Dimension(100, 300));
 
@@ -41,22 +44,27 @@ public class ToolbarPanel extends Panel {
     }
 
     private void addDefaultItems() {
-        // Ajouter un rectangle
-        Shape rectangle = new Rectangle(50, 25);
-        addTemplate(rectangle, createShapeIcon(rectangle));
 
-        // Ajouter un polygone régulier
-        Shape polygon = new Hexagon(0, 0);
-        addTemplate(polygon, createShapeIcon(polygon));
-
-        // Ajouter un groupe de formes
-        // Créer un groupe de formes avec des coordonnées relatives
+        
+        Shape rectangle = new Rectangle(0, 0);
+        Shape hexagon = new Hexagon(0, 0);
         Map<Shape, Point> shapesWithCoordinates = new HashMap<>();
-        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 150));
-        shapesWithCoordinates.put(new Hexagon(0, 0), new Point(30, 10));
-        Shape group = new Group(shapesWithCoordinates);
-        addTemplate(group, createShapeIcon(group));
+        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 25));
+        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 125));
+        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(250, 25));
+        shapesWithCoordinates.put(new Hexagon(0, 0), new Point(50, 50));
+        Shape group = new Group(shapesWithCoordinates, 300, 150);
+        
+        // ajout au model des formes par défaut
+        model.addToolbarShape(rectangle);
+        model.addToolbarShape(hexagon);
+        model.addToolbarShape(group);
 
+        // Ajouter les formes à la toolbar
+        for (Shape shape : model.getToolbarShapes()) {
+            addTemplate(shape, createShapeIcon(shape));
+        }
+        
         // Ajouter la corbeille
         trashItem = new ToolbarItem(null, createTrashIcon());
         // La corbeille sera dessinée séparément en bas de la toolbar
@@ -206,21 +214,4 @@ public class ToolbarPanel extends Panel {
         return image;
     }
 
-    private static class ToolbarItem {
-        private Shape shape;
-        private Image icon;
-
-        public ToolbarItem(Shape shape, Image icon) {
-            this.shape = shape;
-            this.icon = icon;
-        }
-
-        public Shape getShape() {
-            return shape;
-        }
-
-        public Image getIcon() {
-            return icon;
-        }
-    }
 }

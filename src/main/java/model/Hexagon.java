@@ -8,12 +8,12 @@ import visitor.ShapeVisitor;
 public class Hexagon implements Shape {
     private int sides;
     private int sideLength;
-    private int x, y; 
-    private double rotation; 
+    private int x, y;
+    private double rotation;
     private Color color;
     
     private final Color DEFAULT_COLOR = Color.GREEN;
-    private final int DEFAULT_SIDES = 6; 
+    private final int DEFAULT_SIDES = 6;
     private final int DEFAULT_SIZE = 30;
     
     public Hexagon(int x, int y) {
@@ -49,6 +49,27 @@ public class Hexagon implements Shape {
             double angle = 2 * Math.PI * i / sides + Math.toRadians(rotation);
             xPoints[i] = (int) (x + radius * Math.cos(angle));
             yPoints[i] = (int) (y + radius * Math.sin(angle));
+        }
+
+        // Dessiner et remplir l'hexagone
+        g.fillPolygon(xPoints, yPoints, sides);
+    }
+
+    @Override
+    public void draw(Graphics g, int shapeX, int shapeY) {
+        g.setColor(color);
+
+        // Calculer les coordonnées des sommets
+        int[] xPoints = new int[sides];
+        int[] yPoints = new int[sides];
+
+        // Rayon basé sur la longueur des côtés
+        double radius = sideLength / (2 * Math.sin(Math.PI / sides));
+
+        for (int i = 0; i < sides; i++) {
+            double angle = 2 * Math.PI * i / sides + Math.toRadians(rotation);
+            xPoints[i] = (int) (shapeX + radius * Math.cos(angle));
+            yPoints[i] = (int) (shapeY + radius * Math.sin(angle));
         }
 
         // Dessiner et remplir l'hexagone

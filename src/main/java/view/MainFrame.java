@@ -35,7 +35,7 @@ public class MainFrame extends Frame {
             commandManager::undo,
             commandManager::redo
         );
-        toolbarPanel = new ToolbarPanel();
+        toolbarPanel = new ToolbarPanel(model);
         drawingPanel = new DrawingPanel(model, commandManager, toolbarPanel);
         
   

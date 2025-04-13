@@ -8,6 +8,7 @@ import visitor.ShapeVisitor;
 public interface Shape {
     Shape copy();
     void draw(Graphics g);
+    void draw(Graphics g, int shapeX, int shapeY);
     void move(int dx, int dy);
     void setColor(Color color);
     int getX();

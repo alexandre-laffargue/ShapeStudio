@@ -12,8 +12,8 @@ public class Rectangle implements Shape {
     private int x, y;
     private Color color;
 
-    private final int DEFAULT_HEIGHT = 50;
     private final int DEFAULT_WIDTH = 100;
+    private final int DEFAULT_HEIGHT = 50;
     private final Color DEFAULT_COLOR = Color.BLUE;
     
 
@@ -29,6 +29,16 @@ public class Rectangle implements Shape {
     public void draw(Graphics g) {
         int topLeftX = getX() - getWidth() / 2;
         int topLeftY = getY() - getHeight() / 2;
+
+        // Dessiner le rectangle
+        g.setColor(color);
+        g.fillRect(topLeftX, topLeftY, getWidth(), getHeight());
+    }
+
+    @Override
+    public void draw(Graphics g, int shapeX, int shapeY) {
+        int topLeftX = shapeX - getWidth() / 2;
+        int topLeftY = shapeY - getHeight() / 2;
 
         // Dessiner le rectangle
         g.setColor(color);

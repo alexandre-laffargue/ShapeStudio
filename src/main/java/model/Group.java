@@ -15,67 +15,58 @@ public class Group implements Shape {
     private int width;
     private int height;
 
-    public Group(Map<Shape, Point> shapesWithCoordinates) {
+    private int x;
+    private int y;
+
+    public Group(Map<Shape, Point> shapesWithCoordinates,int width,int height) {
         this.children = new HashMap<>();
-        int minX = Integer.MAX_VALUE;
-        int minY = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE;
-        int maxY = Integer.MIN_VALUE;
     
         for (Map.Entry<Shape, Point> entry : shapesWithCoordinates.entrySet()) {
             Shape shape = entry.getKey();
             Point relativePosition = entry.getValue();
             this.children.put(shape, relativePosition);
-    
-            // Calculer les limites pour déterminer les dimensions du groupe
-            int shapeX = relativePosition.x;
-            int shapeY = relativePosition.y;
-            int shapeWidth = shape.getWidth();
-            int shapeHeight = shape.getHeight();
-    
-            minX = Math.min(minX, shapeX);
-            minY = Math.min(minY, shapeY);
-            maxX = Math.max(maxX, shapeX + shapeWidth);
-            maxY = Math.max(maxY, shapeY + shapeHeight);
+
+            shape.move(relativePosition.x, relativePosition.y);
         }
-    
-        // Calculer les dimensions du groupe
-        this.width = maxX - minX;
-        this.height = maxY - minY;
+
+        this.width = width;
+        this.height = height;
     }
 
     public List<Shape> getChildren() {
         return new ArrayList<>(children.keySet());
     }
 
-    public void updateRelativePositions() {
-        for (Shape shape : children.keySet()) {
-            int relativeX = shape.getX() - this.getX();
-            int relativeY = shape.getY() - this.getY();
-            children.put(shape, new Point(relativeX, relativeY));
+    @Override
+    public void draw(Graphics g) {
+        int topLeftX = getX() - getWidth() / 2;
+        int topLeftY = getY() - getHeight() / 2;
+
+        for (Map.Entry<Shape, Point> entry : children.entrySet()) {
+            Shape shape = entry.getKey();
+            int shapeX = topLeftX + entry.getValue().x;
+            int shapeY = topLeftY + entry.getValue().y;
+            shape.draw(g, shapeX, shapeY);
         }
     }
 
     @Override
-    public void draw(Graphics g) {
+    public void draw(Graphics g, int offsetX, int offsetY) { // useless maybe
+        int topLeftX = - getWidth() / 2 + offsetX;
+        int topLeftY = - getHeight() / 2 + offsetY;
+
         for (Map.Entry<Shape, Point> entry : children.entrySet()) {
             Shape shape = entry.getKey();
-            Point relativePosition = entry.getValue();
-
-            // Sauvegarder l'état actuel de Graphics
-            Graphics gCopy = g.create();
-
-            // Déplacer le contexte graphique pour dessiner la forme à sa position relative
-            gCopy.translate(this.getX() + relativePosition.x, this.getY() + relativePosition.y);
-            shape.draw(gCopy);
-
-            // Libérer le contexte graphique temporaire
-            gCopy.dispose();
+            //shape.draw(g, topLeftX, topLeftY);
+            shape.draw(g);
         }
     }
+
 
     @Override
     public void move(int dx, int dy) {
+        this.x += dx;
+        this.y += dy;
         for (Shape shape : children.keySet()) {
             shape.move(dx, dy);
         }
@@ -90,12 +81,12 @@ public class Group implements Shape {
 
     @Override
     public int getX() {
-        return children.isEmpty() ? 0 : children.keySet().iterator().next().getX();
+        return this.x;
     }
 
     @Override
     public int getY() {
-        return children.isEmpty() ? 0 : children.keySet().iterator().next().getY();
+        return this.y;
     }
 
     @Override
@@ -121,7 +112,7 @@ public class Group implements Shape {
             Point relativePosition = entry.getValue();
             copiedChildren.put(shapeCopy, new Point(relativePosition));
         }
-        return new Group(copiedChildren);
+        return new Group(copiedChildren, this.width, this.height);
     }
 
     @Override
