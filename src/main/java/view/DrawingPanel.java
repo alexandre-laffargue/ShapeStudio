@@ -20,7 +20,6 @@ import javax.swing.JPopupMenu;
 import command.AddShapeCommand;
 import command.ColorChangeCommand;
 import command.CommandManager;
-import command.MoveShapeCommand;
 import command.RemoveShapeCommand;
 import model.SceneModel;
 import model.Shape;
@@ -32,7 +31,6 @@ public class DrawingPanel extends Panel {
     private Shape selectedShape;
     private List<Shape> selectedShapes;
     private Point dragStart;
-    private boolean isDragging;
     private boolean isAreaSelecting;
     private Rectangle selectionRect;
     private JPopupMenu contextMenu;
@@ -42,7 +40,6 @@ public class DrawingPanel extends Panel {
         this.commandManager = commandManager;
         this.toolbarPanel = toolbarPanel;
         this.selectedShapes = new ArrayList<>();
-        this.isDragging = false;
         this.isAreaSelecting = false;
 
         setBackground(Color.WHITE);
