@@ -50,18 +50,28 @@ public class DrawingPanel extends Panel {
         setupContextMenu();
     }
 
+    /**
+     * Configure les gestionnaires d'événements pour le panneau de dessin.
+     */
     private void setupEventHandlers() {
         addMouseListener(new MouseAdapter() {
+
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isPopupTrigger()) { // Vérifie si c'est un clic droit
                     Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
-                    if (shapeUnderClick != null && selectedShapes.contains(shapeUnderClick)) {
+                    // sélectionne la forme sous le clic et ouvre le menu contextuel
+                    if (shapeUnderClick != null) {
+                        selectedShapes.clear();
+                        selectedShapes.add(shapeUnderClick);
+                        selectedShape = shapeUnderClick; // Synchroniser selectedShape
+                        dragStart = e.getPoint(); // Enregistrer le point de départ du déplacement
+                        repaint(); // affiche le contour bleu
                         contextMenu.show(DrawingPanel.this, e.getX(), e.getY());
                     }
                 } else {
                     // Vérifier si un item est sélectionné dans la ToolbarPanel
-                    if (toolbarPanel.isTrashSelected()) {
+                    if (toolbarPanel.isTrashSelected()) { // Pour supprimer une forme
                         // Supprimer la forme sous le clic
                         Shape shapeToDelete = findShapeAt(e.getX(), e.getY());
                         if (shapeToDelete != null) {
@@ -69,31 +79,27 @@ public class DrawingPanel extends Panel {
                         }
                     } else {
                         Shape tbSelectedShape = toolbarPanel.getSelectedShape();
-                        if (tbSelectedShape != null) {
+                        if (tbSelectedShape != null) { // Vérifier si un item est sélectionné pour ajouter une forme
                             // Ajouter une nouvelle forme au DrawingPanel
                             addShape(tbSelectedShape, e.getX(), e.getY());
                         } else {
                             // Si aucun item n'est sélectionné dans la ToolbarPanel, sélectionner une forme
                             Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
-
                             if (shapeUnderClick != null) {
-                                if (e.isControlDown()) {
-                                    // Ajouter à la sélection si Ctrl est maintenu
+                                if (e.isControlDown()) {  // Vérifier si Ctrl est maintenu
                                     if (!selectedShapes.contains(shapeUnderClick)) {
                                         selectedShapes.add(shapeUnderClick);
                                     } else {
-                                        // Désélectionner si déjà sélectionné
                                         selectedShapes.remove(shapeUnderClick);
                                     }
-                                } else {
-                                    // Remplacer la sélection actuelle
+                                } else { // Sélectionner une nouvelle forme seule
                                     selectedShapes.clear();
                                     selectedShapes.add(shapeUnderClick);
                                     selectedShape = shapeUnderClick; // Synchroniser selectedShape
                                     dragStart = e.getPoint(); // Enregistrer le point de départ du déplacement
                                 }
                                 System.out.println("Forme sélectionnée : " + shapeUnderClick);
-                            } else {
+                            } else { // Sélectionner une zone
                                 // Si aucune forme n'est trouvée, commencer une sélection de zone
                                 selectedShapes.clear();
                                 selectedShape = null;
@@ -109,35 +115,13 @@ public class DrawingPanel extends Panel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
-                    if (shapeUnderClick != null && selectedShapes.contains(shapeUnderClick)) {
-                        contextMenu.show(DrawingPanel.this, e.getX(), e.getY());
-                    }
-                } else {
-                    if (isAreaSelecting) {
-                        // Finaliser la sélection de zone
-                        finishAreaSelection();
-                        isAreaSelecting = false;
-                        selectionRect = null;
-                    }
-                    // Arrêter le déplacement
-                    else if (isDragging) {
-                        int dx = e.getX() - dragStart.x;
-                        int dy = e.getY() - dragStart.y;
-
-                        if (!selectedShapes.isEmpty()) {
-                            // Exécuter une commande de déplacement pour chaque forme sélectionnée
-                            for (Shape shape : selectedShapes) {
-                                commandManager.executeCommand(
-                                    new MoveShapeCommand(model, shape, dx, dy)
-                                );
-                            }
-                        }
-                        isDragging = false;
-                    }
-                    repaint();
+                if (isAreaSelecting) {
+                    // Finaliser la sélection de zone
+                    finishAreaSelection();
+                    isAreaSelecting = false;
+                    selectionRect = null;
                 }
+                repaint();
             }
         });
 
@@ -149,30 +133,18 @@ public class DrawingPanel extends Panel {
                     updateSelectionRect(e.getPoint());
                     repaint();
                 }
-                else if (!selectedShapes.isEmpty()) {
-                    isDragging = true;
-
-                    // Calculer le déplacement
-                    int dx = e.getX() - dragStart.x;
-                    int dy = e.getY() - dragStart.y;
-
-                    // Déplacer toutes les formes sélectionnées
-                    for (Shape shape : selectedShapes) {
-                        shape.move(dx, dy);
-                    }
-
-                    dragStart = e.getPoint(); // Mettre à jour le point de départ
-                    repaint();
-                }
             }
         });
     }
 
+    /**
+     * Configure le menu contextuel pour changer la couleur de la forme sélectionnée.
+     */
     private void setupContextMenu() {
         contextMenu = new JPopupMenu();
         JMenuItem changeColorItem = new JMenuItem("Changer la couleur");
 
-        // Action : Change Color
+        // Action pour changer la couleur de la forme sélectionnée
         changeColorItem.addActionListener(e -> {
             if (selectedShape != null) {
                 Color newColor = JColorChooser.showDialog(this, "Choisir une couleur", Color.BLACK);
@@ -188,6 +160,10 @@ public class DrawingPanel extends Panel {
         contextMenu.add(changeColorItem);
     }
 
+    /**
+     * Met à jour le rectangle de sélection en fonction du point actuel.
+     * @param currentPoint Le point actuel de la souris.
+     */
     private void updateSelectionRect(Point currentPoint) {
         int x = Math.min(dragStart.x, currentPoint.x);
         int y = Math.min(dragStart.y, currentPoint.y);
@@ -196,6 +172,9 @@ public class DrawingPanel extends Panel {
         selectionRect = new Rectangle(x, y, width, height);
     }
 
+    /**
+     * Finalise la sélection de zone en ajoutant toutes les formes qui intersectent avec le rectangle de sélection.
+     */
     private void finishAreaSelection() {
         if (selectionRect != null) {
             // Sélectionner toutes les formes qui intersectent avec le rectangle de sélection
@@ -225,6 +204,12 @@ public class DrawingPanel extends Panel {
         }
     }
 
+    /**
+     * Trouve la forme à la position (x, y) dans le modèle.
+     * @param x La coordonnée x.
+     * @param y La coordonnée y.
+     * @return La forme trouvée ou null si aucune forme n'est trouvée.
+     */
     private Shape findShapeAt(int x, int y) {
         List<Shape> shapes = model.getShapes();
         for (int i = shapes.size() - 1; i >= 0; i--) {
@@ -243,6 +228,12 @@ public class DrawingPanel extends Panel {
         return null;
     }
 
+    /**
+     * Ajoute une nouvelle forme au modèle et à l'affichage.
+     * @param shape La forme à ajouter.
+     * @param x La position x de la forme.
+     * @param y La position y de la forme.
+     */
     public void addShape(Shape shape, int x, int y) {
         Shape newShape = shape.copy();
         newShape.move(x - newShape.getX(), y - newShape.getY());
@@ -254,6 +245,10 @@ public class DrawingPanel extends Panel {
         repaint();
     }
 
+    /**
+     * Supprime une forme du modèle et de l'affichage.
+     * @param shape La forme à supprimer.
+     */
     public void removeShape(Shape shape) {
 
         model.getShapes().remove(shape);
@@ -266,6 +261,11 @@ public class DrawingPanel extends Panel {
         repaint();
     }
 
+    /**
+     * Dessine toutes les formes sur le panneau.
+     * Si une forme est sélectionnée, elle est dessinée avec un contour bleu.
+     * Les formes sélectionnées sont dessinées avec un contour bleu et des points de contrôle.
+     */
     @Override
     public void paint(Graphics g) {
         super.paint(g);
