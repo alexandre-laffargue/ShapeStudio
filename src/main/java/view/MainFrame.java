@@ -5,6 +5,11 @@ import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import command.CommandManager;
 import model.SceneModel;
@@ -13,7 +18,6 @@ public class MainFrame extends Frame {
     private SceneModel model;
     private CommandManager commandManager;
     private MenubarPanel menubarPanel;
-    private DrawingPanel drawingPanel;
     private MainCanvas canvas;
 
     public MainFrame(String title) {
@@ -61,8 +65,12 @@ public class MainFrame extends Frame {
         String filename = dialog.getFile();
         if (filename != null) {
             String path = dialog.getDirectory() + filename;
-            System.out.println("Sauvegarde du document vers: " + path);
-            // Implémenter la sauvegarde du document
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
+                oos.writeObject(model); // Sérialiser le modèle
+                System.out.println("Document sauvegardé avec succès : " + path);
+            } catch (IOException e) {
+                System.err.println("Erreur lors de la sauvegarde : " + e.getMessage());
+            }
         }
     }
 
@@ -73,13 +81,15 @@ public class MainFrame extends Frame {
         String filename = dialog.getFile();
         if (filename != null) {
             String path = dialog.getDirectory() + filename;
-            System.out.println("Chargement du document depuis: " + path);
-            // Implémenter le chargement du document
-            drawingPanel.repaint();
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+                SceneModel loadedModel = (SceneModel) ois.readObject(); // Désérialiser le modèle
+                model = loadedModel; // Remplacer le modèle actuel
+                canvas.setModel(model); // Mettre à jour le canvas avec le nouveau modèle
+                canvas.repaint();
+                System.out.println("Document chargé avec succès : " + path);
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Erreur lors du chargement : " + e.getMessage());
+            }
         }
     }
-
-
-
-
 }

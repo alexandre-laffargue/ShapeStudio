@@ -85,6 +85,15 @@ public class MainCanvas extends Canvas {
     }
 
     /**
+     * Définit le modèle de la scène.
+     * @param model Le modèle de la scène.
+     */
+    public void setModel(SceneModel model) {
+        this.model = model;
+        repaint();
+    }
+
+    /**
      * Ajouter des éléments par défaut à la toolbar
      */
     private void addDefaultToolbarItems() {
@@ -650,6 +659,9 @@ public class MainCanvas extends Canvas {
         super.paint(g);
 
         // Partie TOOLBAR
+        if (model.getToolbarShapes().size() != toolbarItems.size()) {
+            updateToolbarItem();
+        }
         int y = ITEM_PADDING;
         for (ToolbarItem item : toolbarItems) {
             drawItem(g, item, y, false);

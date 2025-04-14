@@ -1,10 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SceneModel {
+public class SceneModel implements Serializable {
 
+    private static final long serialVersionUID = 1L; // Ajoutez un UID pour la sérialisation
     private List<Shape> shapes;
     private List<Shape> toolbarShapes; // Liste pour les shapes de la toolbar
 

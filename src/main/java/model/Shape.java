@@ -2,10 +2,10 @@ package model;
 
 import java.awt.Color;
 import java.awt.Graphics;
-
+import java.io.Serializable;
 import visitor.ShapeVisitor;
 
-public interface Shape {
+public interface Shape extends Serializable {
     Shape copy();
     void draw(Graphics g);
     void draw(Graphics g, int shapeX, int shapeY);
