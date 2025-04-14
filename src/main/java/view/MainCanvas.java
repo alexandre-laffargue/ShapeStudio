@@ -175,13 +175,12 @@ public class MainCanvas extends Canvas {
      * @param g Le contexte graphique
      * @param item L'élément à dessiner
      * @param y La position verticale de l'élément
-     * @param isSelected Indique si l'élément est sélectionné
      */
-    private void drawItem(Graphics g, ToolbarItem item, int y, boolean isSelected) {
+    private void drawItem(Graphics g, ToolbarItem item, int y) {
         int centerX = TOOLBAR_WIDTH / 2;
 
         // Dessiner le cadre de l'élément
-        g.setColor(isSelected ? Color.ORANGE : Color.DARK_GRAY);
+        g.setColor(Color.DARK_GRAY);
         g.drawRect(ITEM_PADDING, y, TOOLBAR_WIDTH - 2 * ITEM_PADDING, ITEM_HEIGHT);
 
         if (item.getIcon() != null) {
@@ -715,13 +714,13 @@ public class MainCanvas extends Canvas {
         }
         int y = ITEM_PADDING;
         for (ToolbarItem item : toolbarItems) {
-            drawItem(g, item, y, false);
+            drawItem(g, item, y);
             y += ITEM_HEIGHT + ITEM_PADDING;
         }
 
         // Dessiner la corbeille en bas
         if (trashItem != null) {
-            drawItem(g, trashItem, getHeight() - ITEM_HEIGHT - ITEM_PADDING, false);
+            drawItem(g, trashItem, getHeight() - ITEM_HEIGHT - ITEM_PADDING);
         }
 
         // Partie ZONE DE DESSIN
