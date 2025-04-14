@@ -124,6 +124,10 @@ package "model" {
         + void removeToolbarShape(Shape shape)
         + List<Shape> getToolbarShapes()
         + void clearToolbarShapes()
+        + SceneMemento save()
+        + void restore(SceneMemento memento)
+        + void replaceShapes(List<Shape> toRemove, Shape toAdd)
+        + List<Shape> cloneShapes()
     }
 
     class SceneMemento {
