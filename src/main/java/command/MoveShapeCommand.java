@@ -8,17 +8,17 @@ public class MoveShapeCommand extends AbstractCommand {
     private final int dx, dy;
     private int previousX, previousY;
 
-    public MoveShapeCommand(SceneModel scene, Shape shape, int dx, int dy) {
+    public MoveShapeCommand(SceneModel scene, Shape shape, int dx, int dy, int previousX, int previousY) {
         super(scene);
         this.shape = shape;
         this.dx = dx;
         this.dy = dy;
+        this.previousX = previousX;
+        this.previousY = previousY;
     }
 
     @Override
     public void execute() {
-        previousX = shape.getX();
-        previousY = shape.getY();
         shape.move(dx, dy);
     }
 

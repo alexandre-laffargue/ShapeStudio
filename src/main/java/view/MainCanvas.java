@@ -32,6 +32,7 @@ import command.CommandManager;
 import command.AddTBShapeCommand;
 import command.MoveShapeCommand;
 import command.RemoveShapeCommand;
+import command.RemoveTBShapeCommand;
 
 public class MainCanvas extends Canvas {
 
@@ -50,9 +51,10 @@ public class MainCanvas extends Canvas {
     private Shape selectedShape;
     private List<Shape> selectedShapes = new ArrayList<>();
     private Point dragStart;
+    private Point firstDragStart; // Position initiale du drag-and-drop
     private boolean isAreaSelecting = false;
     private boolean isDragging = false;
-    private java.awt.Rectangle selectionRect;
+    private Rectangle selectionRect;
     private JPopupMenu contextMenu;
 
     private static final int TOOLBAR_WIDTH = 100;
@@ -60,6 +62,11 @@ public class MainCanvas extends Canvas {
     private int groupWidth;
     private int groupHeight;
 
+    /**
+     * Constructeur de la classe MainCanvas.
+     * @param model Le modèle de la scène.
+     * @param commandManager Le gestionnaire de commandes.
+     */
     public MainCanvas(SceneModel model, CommandManager commandManager) {
         this.model = model;
         this.commandManager = commandManager;
@@ -109,6 +116,12 @@ public class MainCanvas extends Canvas {
     // Gestion de la toolbar
     /////////////////////////////////////
 
+    /**
+     * Trouver l'élément de la toolbar à la position (x, y)
+     * @param x La coordonnée x
+     * @param y La coordonnée y
+     * @return L'élément trouvé ou null si aucun élément n'est trouvé
+     */
     private ToolbarItem findItemAt(int x, int y) {
         // Vérifier d'abord la corbeille (en bas)
         if (trashItem != null) {
@@ -131,25 +144,13 @@ public class MainCanvas extends Canvas {
         return null;
     }
 
-    public Shape getSelectedShape() {
-        return selectedToolbarItem != null && selectedToolbarItem != trashItem ? selectedToolbarItem.getShape() : null;
-    }
-
-    public boolean isTrashSelected() {
-        return selectedToolbarItem == trashItem;
-    }
-
-    public void clearSelectedItem() {
-        selectedToolbarItem = null;
-    }
-
     /**
      * Ajouter un élément à la toolbar
      * @param shape La forme à ajouter
      * @param icon L'icône de la forme
      */
     public void addTemplate(Shape shape, Image icon) {
-        toolbarItems.add(new ToolbarItem(shape.copy(), icon));
+        toolbarItems.add(new ToolbarItem(shape, icon));
         repaint();
     }
 
@@ -271,8 +272,14 @@ public class MainCanvas extends Canvas {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (selectedToolbarItem != null && selectedToolbarItem.getShape() != null) {
-                    if (e.getX() > TOOLBAR_WIDTH) { // Vérifie si le relâchement est dans la zone de dessin
-                        Shape shapeToAdd = selectedToolbarItem.getShape();
+                    int trashY = getHeight() - ITEM_HEIGHT - ITEM_PADDING;
+                    // Vérifier si l'item est relâché sur la corbeille
+                    if (e.getX() >= ITEM_PADDING && e.getX() <= TOOLBAR_WIDTH - ITEM_PADDING &&
+                        e.getY() >= trashY && e.getY() <= trashY + ITEM_HEIGHT) {
+                        // Supprimer l'item de la toolbar
+                        removeToolbarItem(selectedToolbarItem);
+                    } else if (e.getX() > TOOLBAR_WIDTH) { // Vérifie si le relâchement est dans la zone de dessin
+                        Shape shapeToAdd = selectedToolbarItem.getShape().copy();
                         addShape(shapeToAdd, e.getX(), e.getY());
                     }
                     selectedToolbarItem = null; // Réinitialiser après le drop
@@ -307,8 +314,8 @@ public class MainCanvas extends Canvas {
                         if (shapeUnderClick != null) {
                             selectedShapes.clear();
                             selectedShapes.add(shapeUnderClick);
-                            selectedShape = shapeUnderClick; // Synchroniser selectedShape
-                            dragStart = e.getPoint(); // Enregistrer le point de départ du déplacement
+                            selectedShape = shapeUnderClick;
+                            dragStart = e.getPoint();
                             repaint(); // affiche le contour bleu
                             contextMenu.show(MainCanvas.this, e.getX(), e.getY());
                         }
@@ -323,15 +330,15 @@ public class MainCanvas extends Canvas {
                                 }
                             } else if (selectedShapes.contains(shapeUnderClick)) {
                                 dragStart = e.getPoint();
+                                firstDragStart = e.getPoint(); // Initialiser la position initiale
                             } else { // Sélectionner une nouvelle forme seule
                                 // Commencer le drag-and-drop pour une forme existante
                                 selectedShapes.clear();
                                 selectedShapes.add(shapeUnderClick);
                                 selectedShape = shapeUnderClick;
                                 dragStart = e.getPoint();
+                                firstDragStart = e.getPoint(); // Initialiser la position initiale
                             }
-                            System.out.println("Forme sélectionnée : " + shapeUnderClick);
-                            System.out.println("Formes sélectionnées : " + selectedShapes);
                         } else {
                             // Commencer une sélection de zone
                             isAreaSelecting = true;
@@ -377,10 +384,11 @@ public class MainCanvas extends Canvas {
                         
                         if (!selectedShapes.isEmpty()) {
                             // Exécuter une commande de déplacement pour chaque forme sélectionnée
-                            System.out.println("MoveShapeCommand de la sélection : " + selectedShapes);
+                            //System.out.println("MoveShapeCommand de la sélection : " + selectedShapes);
                             for (Shape shape : selectedShapes) {
                                 commandManager.executeCommand(
-                                    new MoveShapeCommand(model, shape, dx, dy)
+                                    new MoveShapeCommand(model, shape, dx, dy,
+                                        firstDragStart.x, firstDragStart.y)
                                     );
                             }
                         }
@@ -464,7 +472,6 @@ public class MainCanvas extends Canvas {
      */
     private void finishAreaSelection() {
         if (selectionRect != null) {
-            System.out.println("Fin de la sélection de zone : " + selectionRect);
             // Sélectionner toutes les formes qui intersectent avec le rectangle de sélection
             List<Shape> shapes = model.getShapes();
             selectedShapes.clear(); // Réinitialiser la sélection multiple
@@ -480,7 +487,6 @@ public class MainCanvas extends Canvas {
                 // Si le rectangle de sélection intersecte avec la hitbox de la forme
                 if (selectionRect.intersects(shapeBounds)) {
                     selectedShapes.add(shape);
-                    System.out.println("Forme sélectionnée par la zone : " + shape);
                 }
             }
 
@@ -577,6 +583,7 @@ public class MainCanvas extends Canvas {
             new AddShapeCommand(model, newShape)
         );
 
+        //System.out.println("Forme ajoutée : " + newShape);
         repaint();
     }
 
@@ -587,12 +594,14 @@ public class MainCanvas extends Canvas {
     public void removeShape(Shape shape) {
 
         model.getShapes().remove(shape);
-        System.out.println("Forme supprimée : " + shape);
+
+        
 
         commandManager.executeCommand(
-            new RemoveShapeCommand(model, shape)
+            new RemoveShapeCommand(model, shape, firstDragStart.x, firstDragStart.y)
         );
 
+        //System.out.println("Forme supprimée : " + shape);
         repaint();
     }
 
@@ -612,8 +621,23 @@ public class MainCanvas extends Canvas {
             groupHeight
         );
         commandManager.executeCommand(groupCommand);
-        System.out.println("GroupCommand exécuté : " + groupCommand);
+        //System.out.println("GroupCommand exécuté : " + groupCommand);
         updateToolbarItem();
+    }
+
+    /**
+     * Supprime un item de la toolbar.
+     * @param item L'item à supprimer.
+     */
+    private void removeToolbarItem(ToolbarItem item) {
+        Shape shape = item.getShape();
+        if (shape != null) {
+            // Exécuter la commande pour supprimer l'item de la toolbar
+            commandManager.executeCommand(new RemoveTBShapeCommand(model, shape));
+            // Mettre à jour la toolbar
+            updateToolbarItem();
+            //System.out.println("Item supprimé de la toolbar : " + shape);
+        }
     }
 
     /**
@@ -641,6 +665,14 @@ public class MainCanvas extends Canvas {
 
         for (Shape shape : model.getShapes()) {
             shape.draw(g);
+        }
+
+        // Dessiner un aperçu de l'item en cours de drag-and-drop
+        if (selectedToolbarItem != null && dragStart != null) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.translate(dragStart.x - 16, dragStart.y - 16); // Centrer l'aperçu
+            selectedToolbarItem.getShape().draw((Graphics2D) g2d);
+            g2d.dispose();
         }
 
         // Dessiner les indicateurs de sélection pour les formes sélectionnées
