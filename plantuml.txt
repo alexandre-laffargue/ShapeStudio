@@ -328,11 +328,11 @@ MainCanvas --> Shape
 MainCanvas --> Group
 ToolbarItem --> Shape
 SceneModel --> Shape
+SceneModel --> SceneMemento
 SceneMemento --> Shape
 RectangleModel ..|> Shape
 Circle ..|> Shape
 Hexagon ..|> Shape
-SceneModel --> SceneMemento
 Group ..|> Shape
 Group --> Shape
 AbstractCommand ..|> Command
