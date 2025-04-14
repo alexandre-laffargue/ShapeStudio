@@ -2,10 +2,10 @@ package visitor;
 
 import model.Group;
 import model.Hexagon;
-import model.Rectangle;
+import model.RectangleModel;
 
 public interface ShapeVisitor {
-    void visit(Rectangle rectangle);
+    void visit(RectangleModel rectangle);
     void visit(Group group);
     void visit(Hexagon polygon);
 }

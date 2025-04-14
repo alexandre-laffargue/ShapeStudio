@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import visitor.ShapeVisitor;
 
-public class Rectangle implements Shape {
+public class RectangleModel implements Shape {
 
     private int height;
     private int width;
@@ -17,7 +17,7 @@ public class Rectangle implements Shape {
     private final Color DEFAULT_COLOR = Color.BLUE;
     
 
-    public Rectangle(int x, int y) {
+    public RectangleModel(int x, int y) {
         this.x = x;
         this.y = y;
         this.height = DEFAULT_HEIGHT;
@@ -85,7 +85,7 @@ public class Rectangle implements Shape {
 
     @Override
     public Shape copy() {
-        Rectangle copy = new Rectangle(x, y);
+        RectangleModel copy = new RectangleModel(x, y);
         copy.width = this.width;
         copy.height = this.height;
         copy.color = this.color;
@@ -94,8 +94,8 @@ public class Rectangle implements Shape {
     
     @Override
     public void updateFrom(Shape other) {
-        if (other instanceof Rectangle) {
-            Rectangle rect = (Rectangle) other;
+        if (other instanceof RectangleModel) {
+            RectangleModel rect = (RectangleModel) other;
             this.x = rect.x;
             this.y = rect.y;
             this.width = rect.width;

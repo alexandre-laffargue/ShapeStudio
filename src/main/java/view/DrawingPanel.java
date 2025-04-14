@@ -28,6 +28,7 @@ public class DrawingPanel extends Panel {
     private SceneModel model;
     private CommandManager commandManager;
     private ToolbarPanel toolbarPanel;
+
     private Shape selectedShape;
     private List<Shape> selectedShapes;
     private Point dragStart;
@@ -39,6 +40,7 @@ public class DrawingPanel extends Panel {
         this.model = model;
         this.commandManager = commandManager;
         this.toolbarPanel = toolbarPanel;
+        
         this.selectedShapes = new ArrayList<>();
         this.isAreaSelecting = false;
 

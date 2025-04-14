@@ -13,8 +13,8 @@ public class MainFrame extends Frame {
     private SceneModel model;
     private CommandManager commandManager;
     private MenubarPanel menubarPanel;
-    private ToolbarPanel toolbarPanel;
     private DrawingPanel drawingPanel;
+    private MainCanvas canvas;
 
     public MainFrame(String title) {
         super(title);
@@ -35,15 +35,12 @@ public class MainFrame extends Frame {
             commandManager::undo,
             commandManager::redo
         );
-        toolbarPanel = new ToolbarPanel(model);
-        drawingPanel = new DrawingPanel(model, commandManager, toolbarPanel);
-        
-  
-        menubarPanel.setDrawingPanel(drawingPanel);
+
+        canvas = new MainCanvas(model, commandManager);
+        menubarPanel.setMainCanvas(canvas);
 
         add(menubarPanel, BorderLayout.NORTH);
-        add(toolbarPanel, BorderLayout.WEST);
-        add(drawingPanel, BorderLayout.CENTER);
+        add(canvas, BorderLayout.CENTER);
 
         setSize(1024, 768);
     }

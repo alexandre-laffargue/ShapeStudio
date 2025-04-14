@@ -21,7 +21,8 @@ public class MenubarPanel extends Panel {
     private Runnable loadAction;
     private Runnable undoAction;
     private Runnable redoAction;
-    private DrawingPanel drawingPanel; // Add reference to the drawing panel
+    private MainCanvas mainCanvas;
+    
 
     private static final int ITEM_WIDTH = 60;
     private static final int ITEM_HEIGHT = 40;
@@ -42,23 +43,23 @@ public class MenubarPanel extends Panel {
     }
     
     // Add method to set the drawing panel reference
-    public void setDrawingPanel(DrawingPanel drawingPanel) {
-        this.drawingPanel = drawingPanel;
+    public void setMainCanvas(MainCanvas drawingPanel) {
+        this.mainCanvas = drawingPanel;
     }
 
     private void addDefaultItems() {
         // Now we'll wrap the undo/redo actions to include a repaint
         Runnable wrappedUndoAction = () -> {
             undoAction.run();
-            if (drawingPanel != null) {
-                drawingPanel.repaint();
+            if (mainCanvas != null) {
+                mainCanvas.repaint();
             }
         };
         
         Runnable wrappedRedoAction = () -> {
             redoAction.run();
-            if (drawingPanel != null) {
-                drawingPanel.repaint();
+            if (mainCanvas != null) {
+                mainCanvas.repaint();
             }
         };
 

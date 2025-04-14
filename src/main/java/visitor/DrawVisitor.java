@@ -3,7 +3,7 @@ package visitor;
 import java.awt.Graphics;
 
 import model.Group;
-import model.Rectangle;
+import model.RectangleModel;
 import model.Hexagon;
 
 public class DrawVisitor implements ShapeVisitor {
@@ -14,7 +14,7 @@ public class DrawVisitor implements ShapeVisitor {
     }
     
     @Override
-    public void visit(Rectangle rectangle) {
+    public void visit(RectangleModel rectangle) {
         rectangle.draw(graphics);
     }
     

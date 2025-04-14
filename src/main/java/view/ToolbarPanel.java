@@ -17,21 +17,23 @@ import java.util.Map;
 
 import model.Group;
 import model.Hexagon;
-import model.Rectangle;
+import model.RectangleModel;
 import model.SceneModel;
 import model.Shape;
 
 public class ToolbarPanel extends Panel {
     private SceneModel model;
-    private List<ToolbarItem> items;
+    private List<ToolbarItem> toolbarItems;
     private ToolbarItem selectedItem; // Item actuellement sélectionné
     private ToolbarItem trashItem;
 
     private static final int ITEM_HEIGHT = 60;
     private static final int ITEM_PADDING = 10;
 
+    private static final int TOOLBAR_WIDTH = 100;
+
     public ToolbarPanel(SceneModel model) {
-        this.items = new ArrayList<>();
+        this.toolbarItems = new ArrayList<>();
         this.model = model;
         setBackground(Color.LIGHT_GRAY);
         setPreferredSize(new Dimension(100, 300));
@@ -45,13 +47,12 @@ public class ToolbarPanel extends Panel {
 
     private void addDefaultItems() {
 
-        
-        Shape rectangle = new Rectangle(0, 0);
+        Shape rectangle = new RectangleModel(0, 0);
         Shape hexagon = new Hexagon(0, 0);
         Map<Shape, Point> shapesWithCoordinates = new HashMap<>();
-        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 25));
-        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(50, 125));
-        shapesWithCoordinates.put(new Rectangle(0, 0), new Point(250, 25));
+        shapesWithCoordinates.put(new RectangleModel(0, 0), new Point(50, 25));
+        shapesWithCoordinates.put(new RectangleModel(0, 0), new Point(50, 125));
+        shapesWithCoordinates.put(new RectangleModel(0, 0), new Point(250, 25));
         shapesWithCoordinates.put(new Hexagon(0, 0), new Point(50, 50));
         Shape group = new Group(shapesWithCoordinates, 300, 150);
         
@@ -96,16 +97,16 @@ public class ToolbarPanel extends Panel {
         if (trashItem != null) {
             int trashY = getHeight() - ITEM_HEIGHT - ITEM_PADDING;
             if (y >= trashY && y < trashY + ITEM_HEIGHT &&
-                x >= ITEM_PADDING && x <= getWidth() - ITEM_PADDING) {
+                x >= ITEM_PADDING && x <= TOOLBAR_WIDTH - ITEM_PADDING) {
                 return trashItem;
             }
         }
 
         // Vérifier les templates
         int currentY = ITEM_PADDING;
-        for (ToolbarItem item : items) {
+        for (ToolbarItem item : toolbarItems) {
             if (y >= currentY && y < currentY + ITEM_HEIGHT &&
-                x >= ITEM_PADDING && x <= getWidth() - ITEM_PADDING) {
+                x >= ITEM_PADDING && x <= TOOLBAR_WIDTH - ITEM_PADDING) {
                 return item;
             }
             currentY += ITEM_HEIGHT + ITEM_PADDING;
@@ -126,7 +127,7 @@ public class ToolbarPanel extends Panel {
     }
 
     public void addTemplate(Shape shape, Image icon) {
-        items.add(new ToolbarItem(shape.copy(), icon));
+        toolbarItems.add(new ToolbarItem(shape.copy(), icon));
         repaint();
     }
 
@@ -136,7 +137,7 @@ public class ToolbarPanel extends Panel {
 
         // Dessiner les templates
         int y = ITEM_PADDING;
-        for (ToolbarItem item : items) {
+        for (ToolbarItem item : toolbarItems) {
             drawItem(g, item, y, item == selectedItem);
             y += ITEM_HEIGHT + ITEM_PADDING;
         }
@@ -148,11 +149,11 @@ public class ToolbarPanel extends Panel {
     }
 
     private void drawItem(Graphics g, ToolbarItem item, int y, boolean isSelected) {
-        int centerX = getWidth() / 2;
+        int centerX = TOOLBAR_WIDTH / 2;
 
         // Dessiner le cadre de l'élément
         g.setColor(isSelected ? Color.ORANGE : Color.DARK_GRAY);
-        g.drawRect(ITEM_PADDING, y, getWidth() - 2 * ITEM_PADDING, ITEM_HEIGHT);
+        g.drawRect(ITEM_PADDING, y, TOOLBAR_WIDTH - 2 * ITEM_PADDING, ITEM_HEIGHT);
 
         if (item.getIcon() != null) {
             // Dessiner l'icône centrée
@@ -179,8 +180,8 @@ public class ToolbarPanel extends Panel {
         g2d.setColor(shape.getColor());
 
         // Calculer le facteur d'échelle pour ajuster la forme à l'icône
-        double scaleX = 28.0 / shape.getWidth(); // Réduire légèrement pour éviter les coupures
-        double scaleY = 28.0 / shape.getHeight();
+        double scaleX = 32.0 / shape.getWidth(); // Réduire légèrement pour éviter les coupures
+        double scaleY = 32.0 / shape.getHeight();
         double scale = Math.min(scaleX, scaleY);
 
         // Centrer la forme dans l'icône
