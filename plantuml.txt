@@ -328,6 +328,7 @@ SceneMemento --> Shape
 RectangleModel ..|> Shape
 Circle ..|> Shape
 Hexagon ..|> Shape
+SceneModel --> SceneMemento
 Group ..|> Shape
 Group --> Shape
 AbstractCommand ..|> Command
