@@ -40,10 +40,10 @@ import command.UnGroupShapeCommand;
 public class MainCanvas extends Canvas {
 
     private SceneModel model; // Modèle de la scène
-    private CommandManager commandManager; // Gestionnaire de commandes
+    private final CommandManager commandManager; // Gestionnaire de commandes
 
     // Liste des éléments de la toolbar
-    private List<ToolbarItem> toolbarItems = new ArrayList<>();
+    private final List<ToolbarItem> toolbarItems = new ArrayList<>();
     private ToolbarItem selectedToolbarItem; // Item actuellement sélectionné
     private ToolbarItem trashItem; // Élément de la corbeille
 
@@ -52,7 +52,7 @@ public class MainCanvas extends Canvas {
 
     // Liste des formes dans la zone de dessin
     private Shape selectedShape;
-    private List<Shape> selectedShapes = new ArrayList<>();
+    private final List<Shape> selectedShapes = new ArrayList<>();
     private Point dragStart;
     private Point firstDragStart; // Position initiale du drag-and-drop
     private boolean isAreaSelecting = false;

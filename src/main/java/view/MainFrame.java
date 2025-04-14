@@ -16,7 +16,7 @@ import model.SceneModel;
 
 public class MainFrame extends Frame {
     private SceneModel model;
-    private CommandManager commandManager;
+    private final CommandManager commandManager;
     private MenubarPanel menubarPanel;
     private MainCanvas canvas;
     private final String toolbarStateFile = "toolbarState.ser"; // Nom du fichier pour l'état de la toolbar

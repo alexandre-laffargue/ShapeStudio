@@ -6,7 +6,7 @@ import model.Shape;
 public class MoveShapeCommand extends AbstractCommand {
     private final Shape shape;
     private final int dx, dy;
-    private int previousX, previousY;
+    private final int previousX, previousY;
 
     public MoveShapeCommand(SceneModel scene, Shape shape, int dx, int dy, int previousX, int previousY) {
         super(scene);

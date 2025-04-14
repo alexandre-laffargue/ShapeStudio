@@ -16,11 +16,11 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 public class MenubarPanel extends Panel {
-    private List<MenuItem> menuItems;
-    private Runnable saveAction;
-    private Runnable loadAction;
-    private Runnable undoAction;
-    private Runnable redoAction;
+    private final List<MenuItem> menuItems;
+    private final Runnable saveAction;
+    private final Runnable loadAction;
+    private final Runnable undoAction;
+    private final Runnable redoAction;
     private MainCanvas mainCanvas;
     
 
@@ -179,8 +179,8 @@ public class MenubarPanel extends Panel {
 
     // Classe interne pour représenter un élément du menu
     private static class MenuItem {
-        private Image icon;
-        private Runnable action;
+        private final Image icon;
+        private final Runnable action;
 
         public MenuItem(Image icon, Runnable action) {
             this.icon = icon;

@@ -5,8 +5,8 @@ import java.awt.Image;
 import model.Shape;
 
 public class ToolbarItem {
-    private Shape shape;
-    private Image icon;
+    private final Shape shape;
+    private final Image icon;
 
     public ToolbarItem(Shape shape, Image icon) {
         this.shape = shape;

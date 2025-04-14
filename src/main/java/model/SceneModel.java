@@ -1,14 +1,16 @@
 package model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SceneModel implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L; // Ajoutez un UID pour la sérialisation
-    private List<Shape> shapes;
-    private List<Shape> toolbarShapes; // Liste pour les shapes de la toolbar
+    private final List<Shape> shapes;
+    private final List<Shape> toolbarShapes; // Liste pour les shapes de la toolbar
 
     public SceneModel() {
         this.shapes = new ArrayList<>();
@@ -48,25 +50,4 @@ public class SceneModel implements Serializable {
         toolbarShapes.clear();
     }
 
-    public SceneMemento save() {
-        return new SceneMemento(new ArrayList<>(shapes), new ArrayList<>(toolbarShapes));
-    }
-
-    public void restore(SceneMemento memento) {
-        this.shapes = memento.getShapes();
-        this.toolbarShapes = memento.getToolbarShapes();
-    }
-
-    public void replaceShapes(List<Shape> toRemove, Shape toAdd) {
-        shapes.removeAll(toRemove);
-        shapes.add(toAdd);
-    }
-
-    public List<Shape> cloneShapes() {
-        List<Shape> copy = new ArrayList<>();
-        for (Shape s : shapes) {
-            copy.add(s.copy());
-        }
-        return copy;
-    }
 }

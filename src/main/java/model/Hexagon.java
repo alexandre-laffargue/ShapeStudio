@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Hexagon implements Shape {
-    private int sides;
-    private int sideLength;
+    private final int sides;
+    private final int sideLength;
     private int x, y;
     private double rotation;
     private Color color;

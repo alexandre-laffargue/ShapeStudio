@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Circle implements Shape {
-    private int radius;
+    private final int radius;
     private int x, y;
     private Color color;
 

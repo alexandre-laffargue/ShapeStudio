@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class Group implements Shape {
     private final Map<Shape, Point> children; // Associer chaque forme à ses coordonnées relatives
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     private int x;
     private int y;
@@ -114,8 +114,6 @@ public class Group implements Shape {
             copiedChildren.put(shapeCopy, new Point(relativePosition));
         }
         Group copiedGroup = new Group(copiedChildren, this.width, this.height);
-        copiedGroup.x = this.x;
-        copiedGroup.y = this.y;
         return copiedGroup;
     }
 }
