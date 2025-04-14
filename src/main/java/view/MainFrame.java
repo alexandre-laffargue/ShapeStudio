@@ -19,6 +19,7 @@ public class MainFrame extends Frame {
     private CommandManager commandManager;
     private MenubarPanel menubarPanel;
     private MainCanvas canvas;
+    private final String toolbarStateFile = "toolbarState.ser"; // Nom du fichier pour l'état de la toolbar
 
     public MainFrame(String title) {
         super(title);
@@ -26,8 +27,10 @@ public class MainFrame extends Frame {
         this.model = new SceneModel();
         this.commandManager = new CommandManager();
 
+        
         setupUI();
         setupWindowListener();
+        loadToolbarState(); // Charger l'état de la toolbar au démarrage
     }
 
     private void setupUI() {
@@ -53,6 +56,7 @@ public class MainFrame extends Frame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                saveToolbarState(); // Sauvegarder l'état de la toolbar avant de quitter
                 System.exit(0);
             }
         });
@@ -90,6 +94,30 @@ public class MainFrame extends Frame {
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Erreur lors du chargement : " + e.getMessage());
             }
+        }
+    }
+
+    private void saveToolbarState() {
+        model.clear();
+        String path = toolbarStateFile;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
+            oos.writeObject(model); // Sérialiser le modèle, y compris la toolbar
+            System.out.println("État de la toolbar sauvegardé avec succès : " + path);
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la sauvegarde de la toolbar : " + e.getMessage());
+        }
+    }
+
+    private void loadToolbarState() {
+        String path = toolbarStateFile;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+            SceneModel loadedModel = (SceneModel) ois.readObject(); // Désérialiser le modèle
+            model = loadedModel; // Remplacer le modèle actuel
+            canvas.setModel(model); // Mettre à jour le canvas avec le nouveau modèle
+            canvas.repaint();
+            System.out.println("État de la toolbar chargé avec succès : " + path);
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Erreur lors du chargement de la toolbar : " + e.getMessage());
         }
     }
 }
