@@ -3,8 +3,6 @@ package model;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import visitor.ShapeVisitor;
-
 public class RectangleModel implements Shape {
 
     private int height;
@@ -85,26 +83,10 @@ public class RectangleModel implements Shape {
 
     @Override
     public Shape copy() {
-        RectangleModel copy = new RectangleModel(x, y);
+        RectangleModel copy = new RectangleModel(this.x, this.y);
         copy.width = this.width;
         copy.height = this.height;
         copy.color = this.color;
         return copy;
-    }
-    
-    @Override
-    public void updateFrom(Shape other) {
-        if (other instanceof RectangleModel) {
-            RectangleModel rect = (RectangleModel) other;
-            this.x = rect.x;
-            this.y = rect.y;
-            this.width = rect.width;
-            this.height = rect.height;
-        }
-    }
-
-    @Override
-    public void accept(ShapeVisitor visitor) {
-        visitor.visit(this);
     }
 }

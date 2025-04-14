@@ -3,8 +3,6 @@ package model;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import visitor.ShapeVisitor;
-
 public class Hexagon implements Shape {
     private int sides;
     private int sideLength;
@@ -117,28 +115,10 @@ public class Hexagon implements Shape {
 
     @Override
     public Shape copy() {
-        Hexagon copy = new Hexagon(x, y, sides, sideLength);
+        Hexagon copy = new Hexagon(this.x, this.y, this.sides, this.sideLength);
         copy.rotation = this.rotation;
         copy.color = this.color;
         return copy;
-    }
-
-    @Override
-    public void updateFrom(Shape other) {
-        if (other instanceof Hexagon) {
-            Hexagon polygon = (Hexagon) other;
-            this.x = polygon.x;
-            this.y = polygon.y;
-            this.sides = polygon.sides;
-            this.sideLength = polygon.sideLength;
-            this.rotation = polygon.rotation;
-            this.color = polygon.color;
-        }
-    }
-
-    @Override
-    public void accept(ShapeVisitor visitor) {
-        visitor.visit(this);
     }
 
     public int getSides() {

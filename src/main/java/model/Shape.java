@@ -3,7 +3,6 @@ package model;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
-import visitor.ShapeVisitor;
 
 public interface Shape extends Serializable {
     Shape copy();
@@ -17,6 +16,4 @@ public interface Shape extends Serializable {
 
     int getWidth();
     int getHeight();
-    void updateFrom(Shape other);
-    void accept(ShapeVisitor visitor);
 }

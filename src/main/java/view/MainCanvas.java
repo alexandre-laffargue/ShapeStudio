@@ -24,8 +24,10 @@ import javax.swing.JPopupMenu;
 import model.Shape;
 import model.RectangleModel;
 import model.SceneModel;
+import model.Circle;
 import model.Group;
 import model.Hexagon;
+import command.AddGroupShapeCommand;
 import command.AddShapeCommand;
 import command.ColorChangeCommand;
 import command.CommandManager;
@@ -33,6 +35,7 @@ import command.AddTBShapeCommand;
 import command.MoveShapeCommand;
 import command.RemoveShapeCommand;
 import command.RemoveTBShapeCommand;
+import command.UnGroupShapeCommand;
 
 public class MainCanvas extends Canvas {
 
@@ -61,6 +64,8 @@ public class MainCanvas extends Canvas {
 
     private int groupWidth;
     private int groupHeight;
+    private int groupX;
+    private int groupY;
 
     /**
      * Constructeur de la classe MainCanvas.
@@ -105,11 +110,13 @@ public class MainCanvas extends Canvas {
         shapesWithCoordinates.put(new RectangleModel(0, 0), new Point(250, 25));
         shapesWithCoordinates.put(new Hexagon(0, 0), new Point(50, 50));
         Shape group = new Group(shapesWithCoordinates, 300, 150);
+        Shape circle = new Circle(0, 0);
         
         // ajout au model des formes par défaut
         model.addToolbarShape(rectangle);
         model.addToolbarShape(hexagon);
         model.addToolbarShape(group);
+        model.addToolbarShape(circle);
 
         // Ajouter les formes à la toolbar
         for (Shape shape : model.getToolbarShapes()) {
@@ -318,16 +325,8 @@ public class MainCanvas extends Canvas {
             public void mousePressed(MouseEvent e) {
                 if (e.getX() > TOOLBAR_WIDTH) { // Vérifie si le clic est dans la zone de dessin
                     if (e.isPopupTrigger()) { // Vérifie si c'est un clic droit
-                        Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
-                        // sélectionne la forme sous le clic et ouvre le menu contextuel
-                        if (shapeUnderClick != null) {
-                            selectedShapes.clear();
-                            selectedShapes.add(shapeUnderClick);
-                            selectedShape = shapeUnderClick;
-                            dragStart = e.getPoint();
-                            repaint(); // affiche le contour bleu
-                            contextMenu.show(MainCanvas.this, e.getX(), e.getY());
-                        }
+                        // Ouvre le menu contextuel
+                        contextMenu.show(MainCanvas.this, e.getX(), e.getY());
                     } else {
                         Shape shapeUnderClick = findShapeAt(e.getX(), e.getY());
                         if (shapeUnderClick != null) {
@@ -447,6 +446,8 @@ public class MainCanvas extends Canvas {
     private void setupContextMenu() {
         contextMenu = new JPopupMenu();
         JMenuItem changeColorItem = new JMenuItem("Changer la couleur");
+        JMenuItem groupItem = new JMenuItem("Group");	
+        JMenuItem ungroupItem = new JMenuItem("De-group");
 
         // Action pour changer la couleur de la forme sélectionnée
         changeColorItem.addActionListener(e -> {
@@ -461,7 +462,32 @@ public class MainCanvas extends Canvas {
             }
         });
 
+        // Action pour grouper les formes sélectionnées
+        groupItem.addActionListener(e -> {
+            if (selectedShapes.size() > 1) {
+                groupShapes();
+                for (Shape shape : selectedShapes) {
+                    removeShape(shape);
+                }
+                selectedShapes.clear();
+                selectedShape = null;
+                repaint();
+            }
+        });
+
+        // Action pour défaire le groupement
+        ungroupItem.addActionListener(e -> {
+            if (selectedShape instanceof Group) {
+                ungroupShapes((Group) selectedShape);
+                selectedShape = null;
+                repaint();
+            }
+        });
+
         contextMenu.add(changeColorItem);
+        contextMenu.addSeparator();
+        contextMenu.add(groupItem);
+        contextMenu.add(ungroupItem);
     }
     
     /**
@@ -543,13 +569,11 @@ public class MainCanvas extends Canvas {
             relativeCoordinates.put(shape, new Point(relativeX, relativeY));
         }
 
-        // Mettre à jour la largeur et la hauteur du groupe
-        int groupWidth = maxX - minX;
-        int groupHeight = maxY - minY;
-
-        // Stocker les dimensions globales dans une variable pour l'utiliser plus tard
-        this.groupWidth = groupWidth;
-        this.groupHeight = groupHeight;
+        // Mettre à jour les dimensions du groupe
+        this.groupWidth = maxX - minX;
+        this.groupHeight = maxY - minY;
+        this.groupX = minX + groupWidth / 2;
+        this.groupY = minY + groupHeight / 2;
 
         return relativeCoordinates;
     }
@@ -604,8 +628,6 @@ public class MainCanvas extends Canvas {
 
         model.getShapes().remove(shape);
 
-        
-
         commandManager.executeCommand(
             new RemoveShapeCommand(model, shape, firstDragStart.x, firstDragStart.y)
         );
@@ -615,22 +637,51 @@ public class MainCanvas extends Canvas {
     }
 
     /**
+     * Crée un groupe de formes sélectionnées.
+     * Calcule les coordonnées relatives et dimensions, puis exécute la commande de groupe.
+     */
+    public void groupShapes() {
+        // Calculer les coordonnées relatives et dimensions
+        Map<Shape, Point> relativeCoordinates = calculateRelativeCoordinates();
+        firstDragStart = new Point(groupX, groupY);
+
+        // Créer un nouvel item dans la toolbar avec AddGroupShapeCommand
+        AddGroupShapeCommand AddGroupShapeCommand = new AddGroupShapeCommand(
+            model,
+            relativeCoordinates,
+            groupWidth,
+            groupHeight,
+            groupX,
+            groupY
+        );
+        commandManager.executeCommand(AddGroupShapeCommand);
+        //System.out.println("AddGroupShapeCommand exécuté : " + AddGroupShapeCommand);
+        repaint();
+    }
+
+    /**
+     * Annule le groupement des formes sélectionnées.
+     * @param group La forme de groupe à défaire.
+     */
+    public void ungroupShapes(Group group) {
+        // Créer une nouvelle commande pour défaire le groupement
+        commandManager.executeCommand(new UnGroupShapeCommand(model, group));
+        //System.out.println("UnGroupShapeCommand exécuté : " + group);
+        repaint();
+    }
+
+    /**
      * Ajoute une forme à la toolbar en tant que groupe.
      * Calcule les coordonnées relatives et dimensions, puis exécute la commande de groupe.
      */
     public void addToolbarShape() {
-        // Calculer les coordonnées relatives et dimensions
-        Map<Shape, Point> relativeCoordinates = calculateRelativeCoordinates();
             
-        // Créer un nouvel item dans la toolbar avec GroupCommand
-        AddTBShapeCommand groupCommand = new AddTBShapeCommand(
-            model,
-            relativeCoordinates,
-            groupWidth,
-            groupHeight
+        // Créer un nouvel item dans la toolbar avec addTBShapeCommand
+        AddTBShapeCommand addTBShapeCommand = new AddTBShapeCommand(
+            model, selectedShape.copy()
         );
-        commandManager.executeCommand(groupCommand);
-        //System.out.println("GroupCommand exécuté : " + groupCommand);
+        commandManager.executeCommand(addTBShapeCommand);
+        //System.out.println("addTBShapeCommand exécuté : " + addTBShapeCommand);
         updateToolbarItem();
     }
 

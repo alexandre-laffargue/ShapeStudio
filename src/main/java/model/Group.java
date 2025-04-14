@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import visitor.ShapeVisitor;
-
 public class Group implements Shape {
     private final Map<Shape, Point> children; // Associer chaque forme à ses coordonnées relatives
     private int width;
@@ -25,8 +23,10 @@ public class Group implements Shape {
             Shape shape = entry.getKey();
             Point relativePosition = entry.getValue();
             this.children.put(shape, relativePosition);
+            int shapeX = -shape.getX() + x + relativePosition.x;
+            int shapeY = -shape.getY() + y + relativePosition.y;
 
-            shape.move(relativePosition.x, relativePosition.y);
+            shape.move(shapeX, shapeY);
         }
 
         this.width = width;
@@ -113,25 +113,9 @@ public class Group implements Shape {
             Point relativePosition = entry.getValue();
             copiedChildren.put(shapeCopy, new Point(relativePosition));
         }
-        return new Group(copiedChildren, this.width, this.height);
-    }
-
-    @Override
-    public void updateFrom(Shape other) {
-        if (other instanceof Group) {
-            Group otherGroup = (Group) other;
-            this.children.clear();
-            for (Shape child : otherGroup.getChildren()) {
-                //this.add(child.copy());
-            }
-        }
-    }
-
-    @Override
-    public void accept(ShapeVisitor visitor) {
-        visitor.visit(this);
-        for (Shape shape : children.keySet()) {
-            shape.accept(visitor);
-        }
+        Group copiedGroup = new Group(copiedChildren, this.width, this.height);
+        copiedGroup.x = this.x;
+        copiedGroup.y = this.y;
+        return copiedGroup;
     }
 }
