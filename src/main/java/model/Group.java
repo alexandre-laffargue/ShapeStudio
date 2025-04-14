@@ -52,13 +52,14 @@ public class Group implements Shape {
 
     @Override
     public void draw(Graphics g, int offsetX, int offsetY) { // useless maybe
-        int topLeftX = - getWidth() / 2 + offsetX;
-        int topLeftY = - getHeight() / 2 + offsetY;
+        int topLeftX = offsetX - getWidth() / 2;
+        int topLeftY = offsetY - getHeight() / 2;
 
         for (Map.Entry<Shape, Point> entry : children.entrySet()) {
             Shape shape = entry.getKey();
-            //shape.draw(g, topLeftX, topLeftY);
-            shape.draw(g);
+            int shapeX = topLeftX + entry.getValue().x;
+            int shapeY = topLeftY + entry.getValue().y;
+            shape.draw(g, shapeX, shapeY);
         }
     }
 
