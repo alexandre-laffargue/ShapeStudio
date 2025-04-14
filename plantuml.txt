@@ -1,0 +1,354 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "view" {
+    class MainFrame {
+        - SceneModel model
+        - CommandManager commandManager
+        - MenubarPanel menubarPanel
+        - MainCanvas canvas
+        - String toolbarStateFile
+        + MainFrame(String title)
+        - void saveDocument()
+        - void loadDocument()
+        - void saveToolbarState()
+        - void loadToolbarState()
+        - void setupUI()
+        - void setupWindowListener()
+    }
+    
+
+    class MenubarPanel {
+        - List<MenuItem> menuItems
+        - Runnable saveAction
+        - Runnable loadAction
+        - Runnable undoAction
+        - Runnable redoAction
+        - MainCanvas mainCanvas
+        + MenubarPanel(Runnable saveAction, Runnable loadAction, Runnable undoAction, Runnable redoAction)
+        + void setMainCanvas(MainCanvas drawingPanel)
+        + void paint(Graphics g)
+        - void addDefaultItems()
+        - void setupEventHandlers()
+        - MenuItem findItemAt(int x, int y)
+        - void drawItem(Graphics g, MenuItem item, int x, int y)
+        - Image loadIcon(String path)
+        - Image loadAndResizeIcon(String path, int targetSize)
+        - Image createFallbackIcon(String iconPath)
+    }
+    
+    class MenuItem {
+        - Image icon
+        - Runnable action
+        + MenuItem(Image icon, Runnable action)
+        + Image getIcon()
+        + Runnable getAction()
+    }
+
+    class MainCanvas {
+        - SceneModel model
+        - CommandManager commandManager
+        - List<ToolbarItem> toolbarItems
+        - ToolbarItem selectedToolbarItem
+        - ToolbarItem trashItem
+        - Shape selectedShape
+        - List<Shape> selectedShapes
+        - Point dragStart
+        - Point firstDragStart
+        - boolean isAreaSelecting
+        - boolean isDragging
+        - Rectangle selectionRect
+        - JPopupMenu contextMenu
+        - int groupWidth
+        - int groupHeight
+        - int groupX
+        - int groupY
+        + MainCanvas(SceneModel model, CommandManager commandManager)
+        + void setModel(SceneModel model)
+        + void addTemplate(Shape shape, Image icon)
+        + void addShape(Shape shape, int x, int y)
+        + void removeShape(Shape shape)
+        + void groupShapes()
+        + void ungroupShapes(Group group)
+        + void addToolbarShape()
+        + void updateToolbarItem()
+        + void paint(Graphics g)
+        - void addDefaultToolbarItems()
+        - ToolbarItem findItemAt(int x, int y)
+        - void drawItem(Graphics g, ToolbarItem item, int y)
+        - Image createShapeIcon(Shape shape)
+        - Image createTrashIcon()
+        - void setupEventHandlersToolbar()
+        - void setupEventHandlersDrawing()
+        - void setupContextMenu()
+        - void updateSelectionRect(Point currentPoint)
+        - void finishAreaSelection()
+        - Map<Shape, Point> calculateRelativeCoordinates()
+        - Shape findShapeAt(int x, int y)
+        - void removeToolbarItem(ToolbarItem item)
+    }
+
+    class ToolbarItem {
+        - Shape shape
+        - Image icon
+        + ToolbarItem(Shape shape, Image icon)
+        + Shape getShape()
+        + Image getIcon()
+    }
+}
+
+package "model" {
+    interface Shape {
+        + Shape copy()
+        + void draw(Graphics g)
+        + void draw(Graphics g, int shapeX, int shapeY)
+        + void move(int dx, int dy)
+        + void setColor(Color color)
+        + int getX()
+        + int getY()
+        + Color getColor()
+        + int getWidth()
+        + int getHeight()
+    }
+
+    class SceneModel {
+        - static final long serialVersionUID
+        - List<Shape> shapes
+        - List<Shape> toolbarShapes
+        + SceneModel()
+        + void addShape(Shape shape)
+        + void removeShape(Shape shape)
+        + List<Shape> getShapes()
+        + void clear()
+        + void addToolbarShape(Shape shape)
+        + void removeToolbarShape(Shape shape)
+        + List<Shape> getToolbarShapes()
+        + void clearToolbarShapes()
+    }
+
+    class SceneMemento {
+        - List<Shape> shapes
+        - List<Shape> toolbarShapes
+        + SceneMemento(List<Shape> shapes, List<Shape> toolbarShapes)
+        + List<Shape> getShapes()
+        + List<Shape> getToolbarShapes()
+    }
+
+    class RectangleModel {
+        - int height
+        - int width
+        - int x
+        - int y
+        - Color color
+        - final int DEFAULT_WIDTH
+        - final int DEFAULT_HEIGHT
+        - final Color DEFAULT_COLOR
+        + RectangleModel(int x, int y)
+        + void draw(Graphics g)
+        + void draw(Graphics g, int shapeX, int shapeY)
+        + void setColor(Color color)
+        + void move(int dx, int dy)
+        + int getX()
+        + int getY()
+        + Color getColor()
+        + int getWidth()
+        + int getHeight()
+        + Shape copy()
+    }
+
+    class Circle {
+        - final int radius
+        - int x
+        - int y
+        - Color color
+        - final int DEFAULT_RADIUS
+        - final Color DEFAULT_COLOR
+        + Circle(int x, int y)
+        + Circle(int x, int y, int radius, Color color)
+        + void draw(Graphics g)
+        + void draw(Graphics g, int shapeX, int shapeY)
+        + void setColor(Color color)
+        + void move(int dx, int dy)
+        + int getX()
+        + int getY()
+        + Color getColor()
+        + int getWidth()
+        + int getHeight()
+        + Shape copy()
+    }
+
+    class Hexagon {
+        - int sides
+        - int sideLength
+        - int x
+        - int y
+        - double rotation
+        - Color color
+        - final Color DEFAULT_COLOR
+        - final int DEFAULT_SIDES
+        - final int DEFAULT_SIZE
+        + Hexagon(int x, int y)
+        + Hexagon(int x, int y, int sides, int sideLength)
+        + void draw(Graphics g)
+        + void draw(Graphics g, int shapeX, int shapeY)
+        + void setColor(Color color)
+        + void move(int dx, int dy)
+        + int getX()
+        + int getY()
+        + Color getColor()
+        + int getWidth()
+        + int getHeight()
+        + Shape copy()
+        + int getSides()
+    }
+
+    class Group {
+        - Map<Shape, Point> children
+        - int width
+        - int height
+        - int x
+        - int y
+        + Group(Map<Shape, Point> shapesWithCoordinates, int width, int height)
+        + List<Shape> getChildren()
+        + void draw(Graphics g)
+        + void draw(Graphics g, int offsetX, int offsetY)
+        + void move(int dx, int dy)
+        + void setColor(Color color)
+        + int getX()
+        + int getY()
+        + Color getColor()
+        + int getWidth()
+        + int getHeight()
+        + Shape copy()
+    }
+}
+
+package "command" {
+    interface Command {
+        + void execute()
+        + void undo()
+    }
+
+    abstract class AbstractCommand {
+        # SceneModel scene
+        + AbstractCommand(SceneModel scene)
+    }
+
+    class CommandManager {
+        - Stack<Command> undoStack
+        - Stack<Command> redoStack
+        + void executeCommand(Command cmd)
+        + void undo()
+        + void redo()
+        + boolean canUndo()
+        + boolean canRedo()
+    }
+    
+    class RemoveTBShapeCommand {
+        - Shape shape
+        + RemoveTBShapeCommand(SceneModel scene, Shape shape)
+        + void execute()
+        + void undo()
+    }
+    
+    class AddTBShapeCommand {
+        - Shape shape
+        + AddTBShapeCommand(SceneModel scene, Shape shape)
+        + void execute()
+        + void undo()
+    }
+
+    class AddShapeCommand {
+        - Shape shape
+        + AddShapeCommand(SceneModel scene, Shape shape)
+        + void execute()
+        + void undo()
+    }
+
+    class RemoveShapeCommand {
+        - Shape shape
+        - int previousX, previousY
+        + RemoveShapeCommand(SceneModel scene, Shape shape, int previousX, int previousY)
+        + void execute()
+        + void undo()
+    }
+
+    class MoveShapeCommand {
+        - Shape shape
+        - int dx, dy
+        - int previousX, previousY
+        + MoveShapeCommand(SceneModel scene, Shape shape, int dx, int dy, int previousX, int previousY)
+        + void execute()
+        + void undo()
+    }
+    
+    class ColorChangeCommand {
+        - Shape shape
+        - Color newColor, previousColor
+        + ColorChangeCommand(SceneModel scene, Shape shape, Color newColor)
+        + void execute()
+        + void undo()
+    }
+
+    class AddGroupShapeCommand {
+        - Map<Shape, Point> shapesWithCoordinates
+        - Group group
+        - int width
+        - int height
+        - int x
+        - int y
+        + AddGroupShapeCommand(SceneModel scene, Map<Shape, Point> shapesWithCoordinates, int width, int height, int x, int y)
+        + void execute()
+        + void undo()
+    }
+
+    class UnGroupShapeCommand {
+        - Group group
+        - List<Shape> ungroupedShapes
+        + UnGroupShapeCommand(SceneModel scene, Group group)
+        + void execute()
+        + void undo()
+    }
+}
+
+MainFrame --> SceneModel
+MainFrame --> CommandManager
+MainFrame --> MenubarPanel
+MainFrame --> MainCanvas
+MenubarPanel --> MainCanvas
+MenubarPanel --> MenuItem
+MainCanvas --> SceneModel
+MainCanvas --> CommandManager
+MainCanvas --> ToolbarItem
+MainCanvas --> Shape
+MainCanvas --> Group
+ToolbarItem --> Shape
+SceneModel --> Shape
+SceneMemento --> Shape
+RectangleModel ..|> Shape
+Circle ..|> Shape
+Hexagon ..|> Shape
+Group ..|> Shape
+Group --> Shape
+AbstractCommand ..|> Command
+AbstractCommand --> SceneModel
+CommandManager --> Command
+RemoveTBShapeCommand ..|> AbstractCommand
+RemoveTBShapeCommand --> Shape
+AddTBShapeCommand ..|> AbstractCommand
+AddTBShapeCommand --> Shape
+AddShapeCommand ..|> AbstractCommand
+AddShapeCommand --> Shape
+RemoveShapeCommand ..|> AbstractCommand
+RemoveShapeCommand --> Shape
+MoveShapeCommand ..|> AbstractCommand
+MoveShapeCommand --> Shape
+ColorChangeCommand ..|> AbstractCommand
+ColorChangeCommand --> Shape
+AddGroupShapeCommand ..|> AbstractCommand
+AddGroupShapeCommand --> Shape
+AddGroupShapeCommand --> Group
+UnGroupShapeCommand ..|> AbstractCommand
+UnGroupShapeCommand --> Group
+UnGroupShapeCommand --> Shape
+@enduml
